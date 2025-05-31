@@ -1,0 +1,17 @@
+/smarty/cache/*
+!/smarty/cache/.gitkeep
+/smarty/templates_c/*
+!/smarty/templates_c/.gitkeep
+/thumbs/*
+!/thumbs/.gitkeep
+/media/*
+!/media/.gitkeep
+/incoming/*
+!/incoming/.gitkeep
+/processed/*
+!/processed/.gitkeep
+/logs/*
+!/logs/.gitkeep
+/vendor/
+.env
+RESUME.md
