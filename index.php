@@ -23,7 +23,7 @@ function generateVideoThumbnail($videoFile, $thumbnailFile, $timePosition = '00:
     }
 }
 
-function getVideoRsolution($videoFile) {
+function getVideoResolution($videoFile) {
     // Construct the ffmpeg command
     $cmd = sprintf(
         'ffprobe -v error -select_streams v:0 -show_entries stream=width,height ' .
@@ -137,6 +137,7 @@ foreach ($candidates as $relPath) {
 }
 
 if (!$videoPath) {
+    error_log("Invalid video path for ID: " . htmlspecialchars($v));
     http_response_code(404);
     $smarty->display('404.tpl');
     exit;

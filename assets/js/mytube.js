@@ -12,8 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     player.poster(thumb);
     player.src({
-        src: media,
-        type: 'application/x-mpegURL' // required for HLS
+        src: media
     });
 
     player.hlsQualitySelector({

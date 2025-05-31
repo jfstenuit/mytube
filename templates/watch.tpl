@@ -71,7 +71,7 @@
       <div class="related-videos">
 {foreach $seealso as $altvid}
         <a href="watch?v={$altvid.id|escape:'url'}" class="video-card">
-          <img src="thumbs/{$altvid.path|escape:'url'}.jpg" alt="">
+          <img src="thumbs/{$altvid.id|escape:'url'}.jpg" alt="">
           <span>{$altvid.title|escape:'html'}</span>
         </a>
 {/foreach}

@@ -8,7 +8,6 @@ echo "Applying POSIX ACLs for MyTube..."
 # Ensure ACLs are supported
 if ! mount | grep -q 'acl'; then
   echo "Error: ACL support not enabled on this filesystem!"
-  exit
 fi
 
 TARGET_USER="www-data"
