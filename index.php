@@ -198,7 +198,11 @@ $context = [
     'og' => $og,
     'video' => $video,
     'seealso' => $seealso,
-    'urlprefix' => $urlprefix
+    'urlprefix' => $urlprefix,
+    'footer_copyright' => Config::get('footer.copyright'),
+    'bmc_enabled' => Config::get('bmc.enabled'),
+    'bmc_slug' => Config::get('bmc.slug'),
+    'bmc_button_text' => Config::get('bmc.button_text')
 ];
 
 if ($action=='watch') {

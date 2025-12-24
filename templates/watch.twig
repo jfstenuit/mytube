@@ -70,21 +70,25 @@
 {% endfor %}
       </div>
     </div>
+    {% if bmc_enabled and bmc_slug %}
     <div class="section">
       <h3>Soutenez mon travail</h3>
 
       <script src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
-        data-name="bmc-button" data-slug="jfstenuit" data-color="#FFDD00"
-        data-emoji="" data-font="Cookie" data-text="Buy me a coffee"
+        data-name="bmc-button" data-slug="{{ bmc_slug|e('html_attr') }}" data-color="#FFDD00"
+        data-emoji="" data-font="Cookie" data-text="{{ bmc_button_text|e('html_attr') }}"
         data-outline-color="#000000" data-font-color="#000000"
         data-coffee-color="#ffffff"></script>
     </div>
+    {% endif %}
   </aside>
   </main>
 
+  {% if footer_copyright %}
   <footer>
-    &copy; Jean-François Stenuit 2016-2025
+    {{ footer_copyright|raw }}
   </footer>
+  {% endif %}
 
 <div id="embed-modal" class="modal" hidden>
   <div class="modal-backdrop" data-close></div>
