@@ -195,6 +195,7 @@ $video["encoded_thumbnail"] = base64_encode($urlprefix . "thumbs/".$v.".jpg");
 $smarty->assign('og', $og);
 $smarty->assign('video', $video);
 $smarty->assign('seealso', $seealso);
+$smarty->assign('urlprefix', $urlprefix);
 
 if ($action=='watch') {
     $smarty->display('watch.tpl');

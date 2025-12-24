@@ -16,8 +16,8 @@
 
   <link href="assets/css/style.css" rel="stylesheet">
   <link href="{$og.image}" rel="image_src">
-  <link rel="alternate" type="application/json+oembed" href="https://vids.axu.be/oembed?v={$video.id|escape:'url'}" title="oEmbed JSON">
-  <link rel="alternate" type="text/xml+oembed" href="https://vids.axu.be/oembed?v={$video.id|escape:'url'}&format=xml" title="oEmbed XML">
+  <link rel="alternate" type="application/json+oembed" href="{$og.url|replace:'watch':'oembed'}" title="oEmbed JSON">
+  <link rel="alternate" type="text/xml+oembed" href="{$og.url|replace:'watch':'oembed'}&format=xml" title="oEmbed XML">
 
   <!-- Video.js JavaScript -->
   <script src="https://vjs.zencdn.net/8.20.0/video.min.js"></script>
@@ -100,7 +100,7 @@
     <textarea id="embed-code" readonly>
 &lt;div style="position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: #000;"&gt;
     &lt;iframe
-        src="https://vids.axu.be/embed?v={$video.id}"
+        src="{$og.url|replace:'watch':'embed'}"
         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
         frameborder="0"
         allowfullscreen&gt;
