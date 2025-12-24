@@ -10,22 +10,15 @@
   {/foreach}
 
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <!-- Video.js CSS -->
-  <link href="https://vjs.zencdn.net/8.20.0/video-js.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/@silvermine/videojs-chromecast@1.5.0/dist/silvermine-videojs-chromecast.css" rel="stylesheet">
+
+  {include file="partials/videojs-includes.tpl"}
+  {include file="partials/videojs-plugins.tpl"}
 
   <link href="assets/css/style.css" rel="stylesheet">
   <link href="{$og.image}" rel="image_src">
   <link rel="alternate" type="application/json+oembed" href="{$og.url|replace:'watch':'oembed'}" title="oEmbed JSON">
   <link rel="alternate" type="text/xml+oembed" href="{$og.url|replace:'watch':'oembed'}&format=xml" title="oEmbed XML">
 
-  <!-- Video.js JavaScript -->
-  <script src="https://vjs.zencdn.net/8.20.0/video.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@videojs/http-streaming@3.1.0/dist/videojs-http-streaming.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/videojs-hls-quality-selector/dist/videojs-hls-quality-selector.min.js"></script>
-  <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@silvermine/videojs-chromecast@1.5.0/dist/silvermine-videojs-chromecast.min.js"></script>
-  
   <script defer src="assets/js/mytube.js"></script>
 
   <title>{$video.title|escape:'html'}</title>
