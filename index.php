@@ -50,16 +50,18 @@ function getVideoResolution($videoFile) {
 }
 
 require __DIR__ . '/vendor/autoload.php';
-use Smarty\Smarty;
+use Twig\Loader\FilesystemLoader;
+use Twig\Environment;
 use App\Core\Config;
 
 Config::load(__DIR__);
 
-$smarty = new Smarty();
-$smarty->setTemplateDir(__DIR__ . '/templates');
-$smarty->setCompileDir(__DIR__ . '/smarty/templates_c');
-$smarty->setCacheDir(__DIR__ . '/smarty/cache');
-$smarty->setConfigDir(__DIR__ . '/smarty/configs');
+// Twig setup
+$loader = new FilesystemLoader(__DIR__ . '/templates');
+$twig = new Environment($loader, [
+    'cache' => __DIR__ . '/twig/cache',
+    'auto_reload' => true
+]);
 
 $urlprefix = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ||
          (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])
@@ -80,7 +82,7 @@ $urlprefix=$urlprefix.dirname(parse_url($myurl, PHP_URL_PATH));
 if (!preg_match('@/$@',$urlprefix)) $urlprefix=$urlprefix.'/';
 if (($action!='watch') && ($action!='embed') && ($action!='oembed')) {
 	header("HTTP/1.0 404 Not Found");
-    $smarty->display('404.tpl');
+    echo $twig->render('404.twig');
 	exit(0);
 }
 
@@ -106,7 +108,7 @@ $video = $sth->fetch(PDO::FETCH_ASSOC);
 if (!isset($video['path'])) {
     header("HTTP/1.0 404 Not Found");
     error_log("Missing video path for ID: " . htmlspecialchars($v));
-    $smarty->display('404.tpl');
+    echo $twig->render('404.twig');
     exit(0);
 }
 
@@ -139,7 +141,7 @@ foreach ($candidates as $relPath) {
 if (!$videoPath) {
     error_log("Invalid video path for ID: " . htmlspecialchars($v));
     http_response_code(404);
-    $smarty->display('404.tpl');
+    echo $twig->render('404.twig');
     exit;
 }
 
@@ -192,22 +194,24 @@ $og=array(
 $video["encoded_video"] = base64_encode($urlprefix . $videoUrlPath);
 $video["encoded_thumbnail"] = base64_encode($urlprefix . "thumbs/".$v.".jpg");
 
-$smarty->assign('og', $og);
-$smarty->assign('video', $video);
-$smarty->assign('seealso', $seealso);
-$smarty->assign('urlprefix', $urlprefix);
+$context = [
+    'og' => $og,
+    'video' => $video,
+    'seealso' => $seealso,
+    'urlprefix' => $urlprefix
+];
 
 if ($action=='watch') {
-    $smarty->display('watch.tpl');
+    echo $twig->render('watch.twig', $context);
 } elseif ($action=='embed') {
-    $smarty->display('embed.tpl');
+    echo $twig->render('embed.twig', $context);
 } elseif ($action=='oembed') {
     if (isset($_GET['format']) && $_GET['format'] === 'xml') {
         header('Content-Type: text/xml; charset=utf-8');
-        $smarty->display('oembed-xml.tpl');
+        echo $twig->render('oembed-xml.twig', $context);
     } else {
         header('Content-Type: application/json; charset=utf-8');
-        $smarty->display('oembed-json.tpl');
+        echo $twig->render('oembed-json.twig', $context);
     }
 }
 

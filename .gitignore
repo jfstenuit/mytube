@@ -1,7 +1,5 @@
-/smarty/cache/*
-!/smarty/cache/.gitkeep
-/smarty/templates_c/*
-!/smarty/templates_c/.gitkeep
+/twig/cache/*
+!/twig/cache/.gitkeep
 /thumbs/*
 !/thumbs/.gitkeep
 /media/*

@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex,nofollow,noarchive">
 
-    {include file="partials/videojs-includes.tpl"}
+    {% include 'partials/videojs-includes.twig' %}
 
-    <title>{$video.title|escape:'html'}</title>
+    <title>{{ video.title|e }}</title>
 
     <script type="text/javascript">
 //<![CDATA[
@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!el) return;
 
     // Decode the base64-encoded media and thumb variables
-    var media = window.atob("{$video.encoded_video}");
-    var thumb = window.atob("{$video.encoded_thumbnail}");
+    var media = window.atob("{{ video.encoded_video }}");
+    var thumb = window.atob("{{ video.encoded_thumbnail }}");
 
     // Get the Video.js player instance
     const player = videojs(el, {
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
 </head>
 <body>
     <div class="video-container">
-        <div class="video-wrapper" style="position: relative; width: 100%; padding-top: {$video.aspect_ratio*100}%;">
+        <div class="video-wrapper" style="position: relative; width: 100%; padding-top: {{ (video.aspect_ratio * 100) }}%;">
             <video id="video-player" class="video-js" controls preload="auto"
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></video>
         </div>

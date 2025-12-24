@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex,nofollow,noarchive">
 
-  {foreach from=$og key=key item=value}
-  <meta property="og:{$key}" content="{$value|escape:'htmlall'}" />
-  {/foreach}
+  {% for key, value in og %}
+  <meta property="og:{{ key }}" content="{{ value|e('html_attr') }}" />
+  {% endfor %}
 
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-  {include file="partials/videojs-includes.tpl"}
-  {include file="partials/videojs-plugins.tpl"}
+  {% include 'partials/videojs-includes.twig' %}
+  {% include 'partials/videojs-plugins.twig' %}
 
   <link href="assets/css/style.css" rel="stylesheet">
-  <link href="{$og.image}" rel="image_src">
-  <link rel="alternate" type="application/json+oembed" href="{$og.url|replace:'watch':'oembed'}" title="oEmbed JSON">
-  <link rel="alternate" type="text/xml+oembed" href="{$og.url|replace:'watch':'oembed'}&format=xml" title="oEmbed XML">
+  <link href="{{ og.image }}" rel="image_src">
+  <link rel="alternate" type="application/json+oembed" href="{{ og.url|replace({'watch': 'oembed'}) }}" title="oEmbed JSON">
+  <link rel="alternate" type="text/xml+oembed" href="{{ og.url|replace({'watch': 'oembed'}) }}&format=xml" title="oEmbed XML">
 
   <script defer src="assets/js/mytube.js"></script>
 
-  <title>{$video.title|escape:'html'}</title>
+  <title>{{ video.title|e }}</title>
 </head>
 <body>
 
@@ -33,18 +33,18 @@
   <main>
   <section class="video-section">
     <div class="video-container">
-      <div class="video-wrapper" style="position: relative; width: 100%; padding-top: {$video.aspect_ratio*100}%;">
+      <div class="video-wrapper" style="position: relative; width: 100%; padding-top: {{ (video.aspect_ratio * 100) }}%;">
         <video id="video-player" class="video-js" controls preload="auto"
           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
-          data-src="{$video.encoded_video}"
-          data-thumb="{$video.encoded_thumbnail}">
+          data-src="{{ video.encoded_video }}"
+          data-thumb="{{ video.encoded_thumbnail }}">
         </video>
       </div>
     </div>
     <div class="video-meta">
-      <h2>{$video.title|escape:'html'}</h2>
+      <h2>{{ video.title|e }}</h2>
       <div class="video-actions">
-        {* <span class="author">{$video.author|escape:'html'}</span> *}
+        {# <span class="author">{{ video.author|e }}</span> #}
         <div class="actions">
           <button id="share-btn" class="material-icons" title="Share">share</button>
           <button id="embed-btn" class="material-icons" title="Embed">code</button>
@@ -53,7 +53,7 @@
     </div>
 
     <div class="video-description">
-      {$video.description}
+      {{ video.description }}
     </div>
 
   </section>
@@ -62,12 +62,12 @@
     <div class="section">
       <h3>Dans la même collection</h3>
       <div class="related-videos">
-{foreach $seealso as $altvid}
-        <a href="watch?v={$altvid.id|escape:'url'}" class="video-card">
-          <img src="thumbs/{$altvid.id|escape:'url'}.jpg" alt="">
-          <span>{$altvid.title|escape:'html'}</span>
+{% for altvid in seealso %}
+        <a href="watch?v={{ altvid.id|url_encode }}" class="video-card">
+          <img src="thumbs/{{ altvid.id|url_encode }}.jpg" alt="">
+          <span>{{ altvid.title|e }}</span>
         </a>
-{/foreach}
+{% endfor %}
       </div>
     </div>
     <div class="section">
@@ -93,7 +93,7 @@
     <textarea id="embed-code" readonly>
 &lt;div style="position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: #000;"&gt;
     &lt;iframe
-        src="{$og.url|replace:'watch':'embed'}"
+        src="{{ og.url|replace({'watch': 'embed'}) }}"
         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
         frameborder="0"
         allowfullscreen&gt;

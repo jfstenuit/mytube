@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<oembed>
+  <version>1.0</version>
+  <type>video</type>
+  <provider_name>MyTube</provider_name>
+  <provider_url>{{ urlprefix }}</provider_url>
+  <title>{{ video.title|e('html_attr') }}</title>
+  <author_name>Jean-François Stenuit</author_name>
+  <author_url>{{ urlprefix }}</author_url>
+  <thumbnail_url>{{ urlprefix }}thumbs/{{ video.path|url_encode }}.jpg</thumbnail_url>
+  <thumbnail_width>1920</thumbnail_width>
+  <thumbnail_height>1080</thumbnail_height>
+  <html><![CDATA[<iframe src="{{ urlprefix }}embed?v={{ video.id|url_encode }}" width="640" height="360" frameborder="0" allowfullscreen></iframe>]]></html>
+  <width>640</width>
+  <height>360</height>
+</oembed>
