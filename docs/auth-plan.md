@@ -28,12 +28,19 @@ Status legend: ✅ done · 🟡 drafted · 🔨 in progress · ⬜ to do
 | Visibility | Who can watch                                        | Listed in "Dans la même collection" |
 |------------|------------------------------------------------------|-------------------------------------|
 | `public`   | Everyone                                             | Everyone                            |
-| `unlisted` | Everyone with the link                               | Only viewers with collection access |
+| `unlisted` | Everyone with the link                               | Viewers with collection access, and visitors who opened an unlisted link of that collection (for their session) |
 | `private`  | Admins, and members of a group granted the collection | Only viewers with collection access |
 
 "Collection access" means `admin` membership, or membership of any group listed
 in `group_collections` for the video's `collection_id`. Self-registered users
 start with no group, so they see public videos only until an admin adds them to one.
+
+**Sharing an unlisted collection** (checkpoint 6, the most common use): a visitor who opens the
+link of an unlisted video can browse all the other unlisted videos of the same collection. The
+collection is remembered in the session (2 h idle, 24 h at most), so it stays unlocked while
+browsing that collection, including from a public sibling. Opening a *public* video unlocks
+nothing, so unlisted videos never surface from the home page. A session cookie is only set when
+an unlisted link is opened; public pages remain cookie-free.
 
 When a private video is denied:
 - **anonymous** → redirect to `login?return=…` (the shared link still works once the user logs in);

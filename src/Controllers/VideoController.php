@@ -10,11 +10,14 @@ use PDO;
 
 class VideoController
 {
+    /** Session key: collections whose unlisted videos the visitor reached by link */
+    private const LINK_COLLECTIONS = 'access.link_collections';
+
     private Access $access;
 
     public function __construct(private App $app)
     {
-        $this->access = new Access($app->db(), $app->auth->user());
+        $this->access = new Access($app->db(), $app->auth->user(), $app->session->get(self::LINK_COLLECTIONS, []));
     }
 
     /** Home page: watch page of a random video among those listed for this viewer */
@@ -72,6 +75,16 @@ class VideoController
         if (!$this->access->canView($video)) {
             $this->denied($mode);
             return;
+        }
+        // A link to an unlisted video opens up the other unlisted videos of its collection
+        // for the rest of the visit (this is how unlisted collections are shared)
+        if ($mode === 'watch' && $video['visibility'] === 'unlisted') {
+            $collectionId = (int) $video['collection_id'];
+            $this->access->addLinkCollection($collectionId);
+            $linked = $app->session->get(self::LINK_COLLECTIONS, []);
+            if (!in_array($collectionId, $linked, true)) {
+                $app->session->set(self::LINK_COLLECTIONS, array_merge($linked, [$collectionId]));
+            }
         }
 
         // we have a path from the DB - now check if it's a mp4 file, a m3u8 or if it's missing

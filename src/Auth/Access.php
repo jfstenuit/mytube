@@ -7,7 +7,8 @@ use PDO;
 /**
  * Video access rules (docs/auth-plan.md, "Access rules"):
  * - public: everyone can watch; listed for everyone
- * - unlisted: everyone with the link can watch; listed only with collection access
+ * - unlisted: everyone with the link can watch; listed with collection access, or once the
+ *   viewer has opened an unlisted link of that collection ("link collections", kept in the session)
  * - private: only with collection access
  * Collection access: admin group, or a group granted the collection (group_collections).
  */
@@ -17,8 +18,16 @@ class Access
     private ?array $granted = null;
     private bool $resolved = false;
 
-    public function __construct(private PDO $db, private ?User $user)
+    /** @param int[] $linkCollections collections whose unlisted videos this viewer reached by link */
+    public function __construct(private PDO $db, private ?User $user, private array $linkCollections = [])
     {
+    }
+
+    public function addLinkCollection(int $collectionId): void
+    {
+        if (!in_array($collectionId, $this->linkCollections, true)) {
+            $this->linkCollections[] = $collectionId;
+        }
     }
 
     public function canView(array $video): bool
@@ -42,11 +51,23 @@ class Access
         if ($granted === null) {
             return ['1 = 1', []];
         }
-        if ($granted === []) {
-            return ["$alias.visibility = 'public'", []];
+        $conditions = ["$alias.visibility = 'public'"];
+        $params = [];
+        if ($granted) {
+            $conditions[] = "$alias.collection_id IN (" . self::placeholders($granted) . ')';
+            $params = array_merge($params, $granted);
         }
-        $placeholders = implode(', ', array_fill(0, count($granted), '?'));
-        return ["($alias.visibility = 'public' OR $alias.collection_id IN ($placeholders))", $granted];
+        $linked = array_values(array_diff($this->linkCollections, $granted));
+        if ($linked) {
+            $conditions[] = "($alias.visibility = 'unlisted' AND $alias.collection_id IN (" . self::placeholders($linked) . '))';
+            $params = array_merge($params, $linked);
+        }
+        return ['(' . implode(' OR ', $conditions) . ')', $params];
+    }
+
+    private static function placeholders(array $values): string
+    {
+        return implode(', ', array_fill(0, count($values), '?'));
     }
 
     /** @return int[]|null */
