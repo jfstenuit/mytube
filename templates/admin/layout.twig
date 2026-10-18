@@ -10,6 +10,15 @@
         <span class="material-icons" aria-hidden="true">add_circle</span>Ajouter une vidéo
         {% if unregistered_count %}<span class="count">{{ unregistered_count }}</span>{% endif %}
       </a>
+      <a href="admin/collections" {% if tab == 'collections' %}aria-current="page"{% endif %}>
+        <span class="material-icons" aria-hidden="true">folder</span>Collections
+      </a>
+      <a href="admin/groups" {% if tab == 'groups' %}aria-current="page"{% endif %}>
+        <span class="material-icons" aria-hidden="true">groups</span>Groupes
+      </a>
+      <a href="admin/users" {% if tab == 'users' %}aria-current="page"{% endif %}>
+        <span class="material-icons" aria-hidden="true">person</span>Utilisateurs
+      </a>
     </nav>
 
     {% block admin_content %}{% endblock %}

@@ -1058,3 +1058,77 @@ main.page-admin {
     padding: 0.75rem 1rem;
   }
 }
+
+/* ---- Administration: lists and link editing ---- */
+
+.admin-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.admin-heading h2 {
+  margin: 0.5rem 0 1rem;
+}
+
+.breadcrumb {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.breadcrumb a {
+  color: var(--muted);
+}
+
+.breadcrumb + h2 {
+  margin-top: 0.2rem;
+}
+
+.checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 18rem;
+  overflow-y: auto;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--input-bg);
+}
+
+.checkbox-list label.checkbox {
+  margin-top: 0;
+  padding: 0.2rem 0;
+}
+
+.side-action {
+  margin-top: 1.25rem;
+}
+
+.aside-title {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.plain-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.plain-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

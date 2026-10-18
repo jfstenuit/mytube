@@ -1,0 +1,18 @@
+{% block subject %}{{ site_name }} : votre compte a été créé{% endblock %}
+
+{% block text %}
+Bonjour {{ name }},
+
+Un compte a été créé pour vous sur {{ site_name }}, avec le nom d'utilisateur
+« {{ username }} ». Pour l'activer, choisissez votre mot de passe en ouvrant
+ce lien :
+
+{{ reset_url }}
+
+Ce lien est valable {{ validity }} et ne peut servir qu'une fois. Vous pourrez
+ensuite vous connecter ici :
+
+{{ login_url }}
+
+Si vous ne vous attendiez pas à ce message, ignorez-le simplement.
+{% endblock %}

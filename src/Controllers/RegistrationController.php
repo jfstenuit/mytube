@@ -211,10 +211,14 @@ class RegistrationController
         $this->app->redirect('login');
     }
 
-    /** Unverified accounts expire, so abandoned sign-ups don't hold usernames forever */
+    /**
+     * Unverified self-registered accounts expire, so abandoned sign-ups don't hold usernames
+     * forever. Accounts created by an administrator (no password until the invitation is used)
+     * are kept.
+     */
     private function purgeStaleAccounts(): void
     {
-        $this->app->db()->exec('DELETE FROM users WHERE email_verified_at IS NULL
+        $this->app->db()->exec('DELETE FROM users WHERE email_verified_at IS NULL AND password_hash IS NOT NULL
             AND created_at < NOW() - INTERVAL ' . self::UNVERIFIED_RETENTION_DAYS . ' DAY');
         $this->app->tokens->purgeExpired();
     }

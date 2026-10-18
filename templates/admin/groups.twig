@@ -1,0 +1,46 @@
+{% extends 'admin/layout.twig' %}
+
+{% block title %}Groupes – Administration – MyTube{% endblock %}
+
+{% block admin_content %}
+  <div class="admin-heading">
+    <h2>Groupes <span class="muted">({{ groups|length }})</span></h2>
+    <a class="btn btn-primary btn-small" href="admin/groups/new">
+      <span class="material-icons" aria-hidden="true">group_add</span>Nouveau groupe
+    </a>
+  </div>
+
+  <div class="table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th scope="col">Groupe</th>
+          <th scope="col">Membres</th>
+          <th scope="col">Collections accessibles</th>
+          <th scope="col"><span class="visually-hidden">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for group in groups %}
+        <tr>
+          <td>
+            <a href="admin/groups/edit?id={{ group.id }}">{{ group.name }}</a>
+            {% if group.is_builtin %}<span class="badge badge-unlisted">intégré</span>{% endif %}
+            {% if group.description %}<div class="muted small">{{ group.description }}</div>{% endif %}
+          </td>
+          <td>{{ group.member_count }}</td>
+          <td>
+            {% if group.is_builtin %}<span class="muted">Toutes</span>
+            {% else %}{% for name in group.collections %}<span class="badge badge-private">{{ name }}</span> {% else %}<span class="muted">Aucune</span>{% endfor %}{% endif %}
+          </td>
+          <td class="actions">
+            <a class="btn btn-small" href="admin/groups/edit?id={{ group.id }}">
+              <span class="material-icons" aria-hidden="true">edit</span>Modifier
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

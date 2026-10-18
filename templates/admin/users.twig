@@ -1,0 +1,54 @@
+{% extends 'admin/layout.twig' %}
+
+{% block title %}Utilisateurs – Administration – MyTube{% endblock %}
+
+{% block admin_content %}
+  <div class="admin-heading">
+    <h2>Utilisateurs <span class="muted">({{ users|length }})</span></h2>
+    <a class="btn btn-primary btn-small" href="admin/users/new">
+      <span class="material-icons" aria-hidden="true">person_add</span>Nouvel utilisateur
+    </a>
+  </div>
+
+  <div class="table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th scope="col">Utilisateur</th>
+          <th scope="col" class="col-optional">E-mail</th>
+          <th scope="col">Groupes</th>
+          <th scope="col">État</th>
+          <th scope="col" class="col-optional">Dernière connexion</th>
+          <th scope="col"><span class="visually-hidden">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for user in users %}
+        <tr>
+          <td>
+            <a href="admin/users/edit?id={{ user.id }}">{{ user.display_name ?: user.username }}</a>
+            {% if user.id == self_id %}<span class="badge badge-unlisted">vous</span>{% endif %}
+            <div class="muted small">{{ user.username }}</div>
+          </td>
+          <td class="col-optional">{{ user.email }}</td>
+          <td>
+            {% for name in user.groups %}<span class="badge badge-private">{{ name }}</span> {% else %}<span class="muted">—</span>{% endfor %}
+          </td>
+          <td>
+            {% if not user.is_active %}<span class="badge badge-problem">Désactivé</span>
+            {% elseif not user.has_password %}<span class="badge badge-warning">Invitation en attente</span>
+            {% elseif not user.email_verified %}<span class="badge badge-warning">E-mail non vérifié</span>
+            {% else %}<span class="badge badge-ok">Actif</span>{% endif %}
+          </td>
+          <td class="col-optional nowrap">{{ user.last_login_at ? user.last_login_at|date('d/m/Y H:i') : '—' }}</td>
+          <td class="actions">
+            <a class="btn btn-small" href="admin/users/edit?id={{ user.id }}">
+              <span class="material-icons" aria-hidden="true">edit</span>Modifier
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

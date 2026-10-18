@@ -184,7 +184,12 @@ The collection switcher on the watch page (phase 4) fulfils this phase:
   videos of the current collection, and the switcher is on every watch page. Both can be added
   later if a full overview of all collections becomes useful.
 
-### 6. Media delivery & protection ⬜
+### 6. Media delivery & protection — nice to have (deferred at checkpoint 5)
+**Not planned for now.** Without encryption (DRM), access controls on media files can't resist
+even a basic stream downloader once a viewer has legitimate access, so the effort isn't worth it
+yet. Today the media files of unlisted and private videos are hidden (their paths only appear on
+pages the viewer may open), not protected. The notes below are kept for a future iteration.
+
 Goals: PHP never streams media, and media may be moved to a separate server or CDN.
 
 - **`MEDIA_BASE_URL`** in `.env` (default: `<app>/media/`). All media and thumbnail URLs are built
@@ -204,8 +209,8 @@ Goals: PHP never streams media, and media may be moved to a separate server or C
   resolution in the database.
 - Thumbnails of private videos are signed the same way.
 
-### 7. Administration UI 🔨 (done before 4–6, at checkpoint 3)
-Done: **video catalogue** (`/admin`, `admin` group only; others get a 404):
+### 7. Administration UI ✅ (videos at checkpoint 3, users/groups/collections at checkpoint 5)
+**Video catalogue** (`/admin`, `admin` group only; others get a 404):
 - **Vidéos**: list with collection, visibility and media status; edit title, description,
   collection (or a new one), visibility; regenerate the thumbnail at a chosen time; remove from the
   catalogue (media files are kept and reappear in the scan).
@@ -217,14 +222,26 @@ Done: **video catalogue** (`/admin`, `admin` group only; others get a 404):
   the watch page only generates missing thumbnails/resolutions for older entries.
 - `<base href>` in the layouts, so relative URLs work under `admin/…`; `APP_TIMEZONE` for displayed dates.
 
-Visibility is enforced since phase 4. Media files themselves are still served without checks
-until phase 6.
+Visibility is enforced since phase 4. Media files themselves are served without checks
+(phase 6 is deferred).
 
-Still to do:
-- Users: create, edit, deactivate, resend verification, trigger a password reset, group membership
-- Groups: create, rename, delete (not `admin`), collection grants
-- Collections: create and rename; per-video visibility and collection
-- The last admin can't remove themselves from `admin`
+**Collections, groups, users** (checkpoint 5):
+- **Collections**: list (videos, groups with access); create, rename; delete only when empty (the
+  default collection, id 0, can't be deleted); choose the groups with access.
+- **Groups**: list (members, collections); create, edit, delete; members and granted collections
+  as checkbox lists. The built-in `admin` group can't be renamed or deleted and has no grants (it
+  sees everything).
+- **Users**: list (groups, status: active / disabled / invitation pending / email not verified, last
+  login); edit username, display name, email, "active" and "email verified" flags, groups; delete;
+  send a password reset link (24 h).
+- **Creating a user = an invitation**: the account has no password; an email link (7 days, same
+  mechanism as password reset) lets the user choose one, which also verifies the address. Unverified
+  self-registrations are still purged after 7 days, invited accounts are not.
+- Links are editable from both sides: user ↔ group on the user and group pages, group ↔ collection
+  on the group and collection pages.
+- Lock-out protection: no disabling, un-verifying, demoting or deleting your own account; the last
+  admin able to log in can't lose that ability (a safety net behind the self rules). Disabling a
+  user logs them out everywhere at once.
 
 ### 8. Likes, comments, view counts ⬜ (planned feature)
 - Logged in: rows carry `user_id` (one like per user). Logged out: rows carry `anon_id` from the

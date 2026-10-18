@@ -42,7 +42,7 @@ class PasswordResetController
                         $request->userAgent(), $app->clientIp);
                     $this->mail($user, 'reset-password', [
                         'reset_url' => $app->publicUrl('reset-password?token=' . rawurlencode($token)),
-                        'minutes' => self::RESET_TTL / 60,
+                        'validity' => (self::RESET_TTL / 60) . ' minutes',
                     ]);
                 }
                 $app->session->flash('info', sprintf(

@@ -1,0 +1,89 @@
+{% extends 'admin/layout.twig' %}
+
+{% block title %}{{ mode == 'create' ? 'Nouvel utilisateur' : account.username }} – Administration – MyTube{% endblock %}
+
+{% block admin_content %}
+  <p class="breadcrumb"><a href="admin/users">Utilisateurs</a> ›</p>
+  <h2>{{ mode == 'create' ? 'Nouvel utilisateur' : (account.display_name ?: account.username) }}</h2>
+
+  {% include 'admin/partials/errors.twig' %}
+
+  <div class="admin-columns">
+    <form method="post" action="{{ mode == 'create' ? 'admin/users/new' : 'admin/users/edit' }}" class="form card">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% if mode == 'edit' %}<input type="hidden" name="id" value="{{ account.id }}">{% endif %}
+
+      <label for="user-username">Nom d'utilisateur</label>
+      <input id="user-username" name="username" type="text" value="{{ form.username }}" pattern="[A-Za-z0-9._\-]{3,64}"
+             maxlength="64" autocapitalize="none" spellcheck="false" required {% if mode == 'create' %}autofocus{% endif %}>
+
+      <label for="user-display-name">Nom affiché <span class="optional">(facultatif)</span></label>
+      <input id="user-display-name" name="display_name" type="text" value="{{ form.display_name }}" maxlength="255">
+
+      <label for="user-email">Adresse e-mail</label>
+      <input id="user-email" name="email" type="email" value="{{ form.email }}" maxlength="255" required>
+
+      {% if mode == 'edit' %}
+      <fieldset class="radio-group">
+        <legend>État</legend>
+        <label class="checkbox"><input type="checkbox" name="is_active" value="1" {% if form.is_active %}checked{% endif %}
+          {% if is_self %}disabled{% endif %}>
+          <span>Compte actif <span class="muted small">— décoché, l'utilisateur est déconnecté partout</span></span></label>
+        {% if is_self %}<input type="hidden" name="is_active" value="1">{% endif %}
+        <label class="checkbox"><input type="checkbox" name="email_verified" value="1" {% if form.email_verified %}checked{% endif %}
+          {% if is_self %}disabled{% endif %}>
+          <span>Adresse e-mail vérifiée</span></label>
+        {% if is_self %}<input type="hidden" name="email_verified" value="1">{% endif %}
+      </fieldset>
+      {% endif %}
+
+      <fieldset class="radio-group">
+        <legend>Groupes</legend>
+        <div class="checkbox-list">
+          {% for group in groups %}
+          <label class="checkbox">
+            <input type="checkbox" name="groups[]" value="{{ group.id }}" {% if group.id in form.groups %}checked{% endif %}>
+            <span>{{ group.name }}{% if group.is_builtin %} <span class="muted small">— accès complet et administration</span>{% elseif group.description %} <span class="muted small">— {{ group.description }}</span>{% endif %}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      {% if mode == 'create' %}
+      <p class="form-hint">Le compte est créé sans mot de passe : une invitation est envoyée par e-mail pour le choisir (valable 7 jours).</p>
+      {% endif %}
+
+      <button type="submit" class="btn btn-primary">{{ mode == 'create' ? 'Créer et envoyer l\'invitation' : 'Enregistrer' }}</button>
+    </form>
+
+    {% if mode == 'edit' %}
+    <aside class="card media-info">
+      <dl>
+        <dt>Créé le</dt><dd>{{ account.created_at|date('d/m/Y H:i') }}</dd>
+        <dt>Dernière connexion</dt><dd>{{ account.last_login_at ? account.last_login_at|date('d/m/Y H:i') : 'jamais' }}</dd>
+        <dt>Mot de passe</dt><dd>{{ account.has_password ? 'défini' : 'pas encore (invitation)' }}</dd>
+      </dl>
+
+      <form method="post" action="admin/users/send-link" class="side-action">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="id" value="{{ account.id }}">
+        <button type="submit" class="btn btn-small">
+          <span class="material-icons" aria-hidden="true">forward_to_inbox</span>
+          {{ account.has_password ? 'Envoyer un lien de réinitialisation' : 'Renvoyer l\'invitation' }}
+        </button>
+      </form>
+
+      {% if not is_self %}
+      <form method="post" action="admin/users/delete" class="danger-zone"
+            onsubmit="return confirm('Supprimer définitivement le compte « {{ account.username|e('js') }} » ?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="id" value="{{ account.id }}">
+        <button type="submit" class="btn btn-danger btn-small">
+          <span class="material-icons" aria-hidden="true">delete</span>Supprimer le compte
+        </button>
+      </form>
+      {% endif %}
+    </aside>
+    {% endif %}
+  </div>
+{% endblock %}

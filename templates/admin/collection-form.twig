@@ -1,0 +1,73 @@
+{% extends 'admin/layout.twig' %}
+
+{% set visibility_labels = {public: 'Publique', unlisted: 'Non répertoriée', private: 'Privée'} %}
+
+{% block title %}{{ mode == 'create' ? 'Nouvelle collection' : collection.name }} – Administration – MyTube{% endblock %}
+
+{% block admin_content %}
+  <p class="breadcrumb"><a href="admin/collections">Collections</a> ›</p>
+  <h2>{{ mode == 'create' ? 'Nouvelle collection' : 'Collection « ' ~ collection.name ~ ' »' }}</h2>
+
+  {% include 'admin/partials/errors.twig' %}
+
+  <div class="admin-columns">
+    <form method="post" action="{{ mode == 'create' ? 'admin/collections/new' : 'admin/collections/edit' }}" class="form card">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% if mode == 'edit' %}<input type="hidden" name="id" value="{{ collection.id }}">{% endif %}
+
+      <label for="collection-name">Nom</label>
+      <input id="collection-name" name="name" type="text" value="{{ form.name }}" maxlength="255" required
+             {% if mode == 'create' %}autofocus{% endif %}>
+
+      <fieldset class="radio-group">
+        <legend>Groupes ayant accès</legend>
+        <p class="form-hint">Leurs membres voient aussi les vidéos privées et non répertoriées de cette collection.
+          Les administrateurs ont toujours accès.</p>
+        {% if groups %}
+        <div class="checkbox-list">
+          {% for group in groups %}
+          <label class="checkbox">
+            <input type="checkbox" name="groups[]" value="{{ group.id }}" {% if group.id in form.groups %}checked{% endif %}>
+            <span>{{ group.name }} <span class="muted small">{{ group.member_count }} membre{{ group.member_count > 1 ? 's' }}</span></span>
+          </label>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="muted">Aucun groupe pour l'instant. <a href="admin/groups/new">Créer un groupe</a></p>
+        {% endif %}
+      </fieldset>
+
+      <button type="submit" class="btn btn-primary">{{ mode == 'create' ? 'Créer la collection' : 'Enregistrer' }}</button>
+    </form>
+
+    {% if mode == 'edit' %}
+    <aside class="card media-info">
+      <h3 class="aside-title">Vidéos ({{ videos|length }})</h3>
+      {% if videos %}
+      <ul class="plain-list">
+        {% for video in videos %}
+        <li><a href="admin/videos/edit?id={{ video.id|url_encode }}">{{ video.title }}</a>
+          <span class="badge badge-{{ video.visibility }}">{{ visibility_labels[video.visibility] }}</span></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="muted">Aucune vidéo.</p>
+      {% endif %}
+
+      {% if not is_default %}
+      <form method="post" action="admin/collections/delete" class="danger-zone"
+            onsubmit="return confirm('Supprimer la collection « {{ collection.name|e('js') }} » ?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="id" value="{{ collection.id }}">
+        <button type="submit" class="btn btn-danger btn-small" {% if videos %}disabled title="Videz d'abord la collection"{% endif %}>
+          <span class="material-icons" aria-hidden="true">delete</span>Supprimer la collection
+        </button>
+        {% if videos %}<p class="form-hint">Seule une collection vide peut être supprimée.</p>{% endif %}
+      </form>
+      {% else %}
+      <p class="form-hint danger-zone">Collection par défaut : elle ne peut pas être supprimée.</p>
+      {% endif %}
+    </aside>
+    {% endif %}
+  </div>
+{% endblock %}

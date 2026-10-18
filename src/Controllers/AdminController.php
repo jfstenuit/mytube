@@ -1,22 +1,13 @@
 <?php
 namespace App\Controllers;
 
-use App\Core\App;
-use App\Media\MediaLibrary;
 use App\Media\VideoProbe;
 use App\Models\Collection;
 use App\Models\Video;
 
 /** Administration: video catalogue and registration of media found in media/ */
-class AdminController
+class AdminController extends AdminBaseController
 {
-    private MediaLibrary $library;
-
-    public function __construct(private App $app)
-    {
-        $this->library = new MediaLibrary($app->rootDir . '/media');
-    }
-
     public function index(): void
     {
         if ($this->guard()) {
@@ -43,7 +34,7 @@ class AdminController
         if (!$this->guard()) {
             return;
         }
-        $this->render('admin/media.twig', ['entries' => $this->unregistered(), 'tab' => 'media']);
+        $this->render('admin/media.twig', ['entries' => $this->unregisteredMedia(), 'tab' => 'media']);
     }
 
     /** Registration form for an unregistered media entry (?path=…) */
@@ -183,32 +174,8 @@ class AdminController
         $app->redirect('admin/videos');
     }
 
-    /** Admins only; others get a 404 so the area isn't revealed */
-    private function guard(): bool
-    {
-        $user = $this->app->auth->user();
-        if ($user === null) {
-            $this->app->redirect('login?return=' . urlencode($this->app->request->uri()));
-            return false;
-        }
-        if (!$user->isAdmin()) {
-            $this->app->notFound();
-            return false;
-        }
-        return true;
-    }
 
-    private function render(string $template, array $context, int $status = 200): void
-    {
-        $context['unregistered_count'] = count(array_filter($this->unregistered(), fn ($e) => $e['problem'] === null));
-        $this->app->render($template, $context, $status);
-    }
 
-    private function unregistered(): array
-    {
-        static $entries = null;
-        return $entries ??= $this->library->unregistered(Video::registeredPaths($this->app->db()));
-    }
 
     /**
      * Reads and validates the metadata form.

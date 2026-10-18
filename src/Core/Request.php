@@ -41,6 +41,13 @@ class Request
         return is_string($value) ? $value : $default;
     }
 
+    /** POST list parameter (name="key[]"): its string values; anything else gives [] */
+    public function inputList(string $key): array
+    {
+        $value = $this->post[$key] ?? [];
+        return is_array($value) ? array_values(array_filter($value, 'is_string')) : [];
+    }
+
     public function cookie(string $key): ?string
     {
         $value = $this->cookies[$key] ?? null;

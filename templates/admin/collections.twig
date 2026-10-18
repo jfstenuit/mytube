@@ -1,0 +1,44 @@
+{% extends 'admin/layout.twig' %}
+
+{% block title %}Collections – Administration – MyTube{% endblock %}
+
+{% block admin_content %}
+  <div class="admin-heading">
+    <h2>Collections <span class="muted">({{ collections|length }})</span></h2>
+    <a class="btn btn-primary btn-small" href="admin/collections/new">
+      <span class="material-icons" aria-hidden="true">create_new_folder</span>Nouvelle collection
+    </a>
+  </div>
+
+  <div class="table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th scope="col">Collection</th>
+          <th scope="col">Vidéos</th>
+          <th scope="col">Groupes ayant accès</th>
+          <th scope="col"><span class="visually-hidden">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for collection in collections %}
+        <tr>
+          <td>
+            <a href="admin/collections/edit?id={{ collection.id }}">{{ collection.name }}</a>
+            {% if collection.id == default_id %}<span class="badge badge-unlisted">par défaut</span>{% endif %}
+          </td>
+          <td>{{ collection.video_count }}</td>
+          <td>{% for name in collection.groups %}<span class="badge badge-private">{{ name }}</span> {% else %}<span class="muted">Administrateurs seulement</span>{% endfor %}</td>
+          <td class="actions">
+            <a class="btn btn-small" href="admin/collections/edit?id={{ collection.id }}">
+              <span class="material-icons" aria-hidden="true">edit</span>Modifier
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="form-hint">Les vidéos publiques sont visibles par tous, quelle que soit la collection. Les groupes
+    ayant accès voient en plus les vidéos privées et non répertoriées.</p>
+{% endblock %}

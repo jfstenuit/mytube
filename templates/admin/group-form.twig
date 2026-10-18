@@ -1,0 +1,73 @@
+{% extends 'admin/layout.twig' %}
+
+{% block title %}{{ mode == 'create' ? 'Nouveau groupe' : group.name }} – Administration – MyTube{% endblock %}
+
+{% block admin_content %}
+  <p class="breadcrumb"><a href="admin/groups">Groupes</a> ›</p>
+  <h2>{{ mode == 'create' ? 'Nouveau groupe' : 'Groupe « ' ~ group.name ~ ' »' }}</h2>
+
+  {% include 'admin/partials/errors.twig' %}
+
+  <div class="admin-columns">
+    <form method="post" action="{{ mode == 'create' ? 'admin/groups/new' : 'admin/groups/edit' }}" class="form card">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% if mode == 'edit' %}<input type="hidden" name="id" value="{{ group.id }}">{% endif %}
+
+      <label for="group-name">Nom</label>
+      <input id="group-name" name="name" type="text" value="{{ form.name }}" maxlength="64" required
+             {% if builtin %}readonly{% elseif mode == 'create' %}autofocus{% endif %}>
+
+      <label for="group-description">Description <span class="optional">(facultatif)</span></label>
+      <input id="group-description" name="description" type="text" value="{{ form.description }}" maxlength="255"
+             {% if builtin %}readonly{% endif %}>
+      {% if builtin %}<p class="form-hint">Groupe intégré : il ne peut être ni renommé ni supprimé.</p>{% endif %}
+
+      <fieldset class="radio-group">
+        <legend>Membres</legend>
+        {% if users %}
+        <div class="checkbox-list">
+          {% for user in users %}
+          <label class="checkbox">
+            <input type="checkbox" name="members[]" value="{{ user.id }}" {% if user.id in form.members %}checked{% endif %}>
+            <span>{{ user.display_name ?: user.username }} <span class="muted small">{{ user.username }}{% if user.id == self_id %} — vous{% endif %}{% if not user.is_active %} — désactivé{% endif %}</span></span>
+          </label>
+          {% endfor %}
+        </div>
+        {% else %}<p class="muted">Aucun utilisateur.</p>{% endif %}
+      </fieldset>
+
+      <fieldset class="radio-group">
+        <legend>Collections accessibles</legend>
+        {% if builtin %}
+        <p class="form-hint">Les administrateurs ont accès à toutes les collections.</p>
+        {% else %}
+        <p class="form-hint">Les membres peuvent voir les vidéos privées et non répertoriées de ces collections.</p>
+        <div class="checkbox-list">
+          {% for collection in collections %}
+          <label class="checkbox">
+            <input type="checkbox" name="collections[]" value="{{ collection.id }}" {% if collection.id in form.collections %}checked{% endif %}>
+            <span>{{ collection.name }} <span class="muted small">{{ collection.video_count }} vidéo{{ collection.video_count > 1 ? 's' }}</span></span>
+          </label>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </fieldset>
+
+      <button type="submit" class="btn btn-primary">{{ mode == 'create' ? 'Créer le groupe' : 'Enregistrer' }}</button>
+    </form>
+
+    {% if mode == 'edit' and not builtin %}
+    <aside class="card media-info">
+      <form method="post" action="admin/groups/delete"
+            onsubmit="return confirm('Supprimer le groupe « {{ group.name|e('js') }} » ? Ses membres perdent l\'accès à ses collections.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="id" value="{{ group.id }}">
+        <button type="submit" class="btn btn-danger btn-small">
+          <span class="material-icons" aria-hidden="true">delete</span>Supprimer le groupe
+        </button>
+      </form>
+      <p class="form-hint">Les comptes des membres ne sont pas supprimés.</p>
+    </aside>
+    {% endif %}
+  </div>
+{% endblock %}
