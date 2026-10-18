@@ -1,5 +1,19 @@
 //<![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
+    // "Autres collections" menu (<details>): close on a click or tap elsewhere, or on Escape
+    const switcher = document.querySelector('.collection-switcher');
+    if (switcher) {
+        document.addEventListener('click', (e) => {
+            if (switcher.open && !switcher.contains(e.target)) switcher.open = false;
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && switcher.open) {
+                switcher.open = false;
+                switcher.querySelector('summary').focus();
+            }
+        });
+    }
+
     const el = document.getElementById('video-player');
     const media = window.atob(el.dataset.src);
     const thumb = window.atob(el.dataset.thumb);

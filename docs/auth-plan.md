@@ -145,11 +145,22 @@ Planned as:
   same, whether or not the account exists. A successful reset sets `password_changed_at`, revokes
   all tokens and logs the user in.
 
-### 4. Access control on videos ⬜
-- `src/Auth/Access.php`: `canView(video, user)` and a filter for listings
-- Applied to `watch`, `embed` and `oembed`, and to the related-videos query (filtered in SQL)
-- `add-video.sh`: optional `visibility` and `collection` arguments (new videos are private by default),
-  and fix the SQL quoting of the title (current shell interpolation breaks on `'`)
+### 4. Access control on videos ✅
+- `src/Auth/Access.php`: `canView()` and an SQL condition for listings, as in "Access rules" above.
+- `watch`: anonymous visitors of a private video go to the login page; logged-in users without
+  access get the 404 page. `embed`: 404. `oembed`: 401 (oEmbed specification). `Vary: Cookie` on
+  watch pages, since the sidebar depends on the viewer.
+- Home page: random pick among the videos listed for the viewer (logged-in users with collection
+  access also get unlisted and private videos of those collections).
+- Sidebar (decided at checkpoint 4, after a mock): "Collection" label and current collection name,
+  then the *other* listed videos of that collection. An **"Autres collections"** menu, shown only
+  when the viewer can see other collections, lists their names (no counts); each opens its
+  **most recently added** video visible to the viewer. Native `<details>` element, closed by a
+  click or tap elsewhere or Escape; 44 px touch targets on touch screens.
+- Migration `003-video-created-at.sql`: `videos.created_at`; existing videos dated from their media
+  files with `003-backfill-created-at.php`.
+- `add-video.sh` is superseded by the admin UI ("Ajouter une vidéo"). It no longer works as is
+  (`resolution` has no default), so it can be removed.
 
 ### 5. Account pages ⬜
 - Profile: update the display name. Changing the email sends a `change_email` confirmation to the
@@ -198,9 +209,8 @@ Done: **video catalogue** (`/admin`, `admin` group only; others get a 404):
   the watch page only generates missing thumbnails/resolutions for older entries.
 - `<base href>` in the layouts, so relative URLs work under `admin/…`; `APP_TIMEZONE` for displayed dates.
 
-**Until phase 4 is done, visibility is stored but not enforced**: private and unlisted videos can
-still be watched by anyone with the link, and appear in "Dans la même collection". Only the home
-page already restricts itself to public videos.
+Visibility is enforced since phase 4. Media files themselves are still served without checks
+until phase 6.
 
 Still to do:
 - Users: create, edit, deactivate, resend verification, trigger a password reset, group membership

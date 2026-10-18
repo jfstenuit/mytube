@@ -1,6 +1,7 @@
 <?php
 namespace App\Controllers;
 
+use App\Auth\Access;
 use App\Core\App;
 use App\Core\Config;
 use App\Media\MediaLibrary;
@@ -9,16 +10,20 @@ use PDO;
 
 class VideoController
 {
+    private Access $access;
+
     public function __construct(private App $app)
     {
+        $this->access = new Access($app->db(), $app->auth->user());
     }
 
-    /** Home page: watch page of a random public video */
+    /** Home page: watch page of a random video among those listed for this viewer */
     public function home(): void
     {
-        $v = $this->app->db()
-            ->query("SELECT id FROM videos WHERE visibility = 'public' ORDER BY RAND() LIMIT 1")
-            ->fetchColumn();
+        [$listable, $params] = $this->access->listableCondition('v');
+        $sth = $this->app->db()->prepare("SELECT v.id FROM videos v WHERE $listable ORDER BY RAND() LIMIT 1");
+        $sth->execute($params);
+        $v = $sth->fetchColumn();
         if ($v === false) {
             $this->app->notFound();
             return;
@@ -43,6 +48,7 @@ class VideoController
         $this->show('oembed', $this->app->request->query('v', ''));
     }
 
+
     private function show(string $mode, string $v): void
     {
         $app = $this->app;
@@ -60,6 +66,11 @@ class VideoController
         if (!isset($video['path'])) {
             error_log("Missing video path for ID: " . htmlspecialchars($v));
             $app->notFound();
+            return;
+        }
+
+        if (!$this->access->canView($video)) {
+            $this->denied($mode);
             return;
         }
 
@@ -99,8 +110,10 @@ class VideoController
             }
         }
 
-        $sth = $dbh->prepare('SELECT * FROM videos WHERE collection_id = ? AND id != ? ORDER BY title');
-        $sth->execute([$video['collection_id'], $v]);
+        // Other videos of the collection that this viewer may see listed
+        [$listable, $params] = $this->access->listableCondition('v');
+        $sth = $dbh->prepare("SELECT v.* FROM videos v WHERE v.collection_id = ? AND v.id != ? AND $listable ORDER BY v.title");
+        $sth->execute(array_merge([$video['collection_id'], $v], $params));
         $seealso = $sth->fetchAll(PDO::FETCH_ASSOC);
 
         $urlprefix = $app->baseUrl;
@@ -128,7 +141,11 @@ class VideoController
             'bmc_button_text' => Config::get('bmc.button_text'),
         ];
 
+
         if ($mode === 'watch') {
+            $context['collection_nav'] = $this->collectionNav((int) $video['collection_id']);
+            // The sidebar depends on who is logged in
+            header('Vary: Cookie');
             $app->render('watch.twig', $context);
         } elseif ($mode === 'embed') {
             $app->render('embed.twig', $context);
@@ -139,5 +156,46 @@ class VideoController
             header('Content-Type: application/json; charset=utf-8');
             $app->render('oembed-json.twig', $context);
         }
+    }
+
+    /**
+     * Video the viewer may not watch. Anonymous visitors of the watch page are sent
+     * to the login page (a shared private link works once logged in); otherwise it
+     * looks exactly like a missing video.
+     */
+    private function denied(string $mode): void
+    {
+        $app = $this->app;
+        if ($mode === 'watch' && $app->auth->user() === null) {
+            $app->redirect('login?return=' . urlencode($app->request->uri()));
+        } elseif ($mode === 'oembed') {
+            // oEmbed specification: 401 for a private resource
+            http_response_code(401);
+            echo 'Unauthorized';
+        } else {
+            $app->notFound();
+        }
+    }
+
+    /**
+     * Current collection, and the other collections with at least one video listed
+     * for this viewer, each linking to its most recently added such video.
+     */
+    private function collectionNav(int $collectionId): array
+    {
+        $db = $this->app->db();
+        $sth = $db->prepare('SELECT name FROM collections WHERE id = ?');
+        $sth->execute([$collectionId]);
+        $current = ['id' => $collectionId, 'name' => (string) $sth->fetchColumn()];
+
+        [$listable, $params] = $this->access->listableCondition('v');
+        $sth = $db->prepare("SELECT c.id, c.name,
+                (SELECT v.id FROM videos v WHERE v.collection_id = c.id AND $listable
+                 ORDER BY v.created_at DESC, v.title LIMIT 1) AS latest_video
+            FROM collections c WHERE c.id != ?
+            HAVING latest_video IS NOT NULL ORDER BY c.name");
+        $sth->execute(array_merge($params, [$collectionId]));
+
+        return ['current' => $current, 'others' => $sth->fetchAll(PDO::FETCH_ASSOC)];
     }
 }

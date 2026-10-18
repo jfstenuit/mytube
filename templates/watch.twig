@@ -47,14 +47,32 @@
   </section>
 
   <aside class="sidebar">
-    <div class="section">
-      <h3>Dans la même collection</h3>
+    <div class="section collection-section">
+      <div class="collection-header">
+        <div class="collection-title">
+          <span class="collection-label">Collection</span>
+          <h3>{{ collection_nav.current.name }}</h3>
+        </div>
+        {% if collection_nav.others %}
+        {# Other collections the viewer can see; each opens its most recently added video #}
+        <details class="collection-switcher">
+          <summary>Autres collections <span class="material-icons" aria-hidden="true">expand_more</span></summary>
+          <ul>
+            {% for other in collection_nav.others %}
+            <li><a href="watch?v={{ other.latest_video|url_encode }}">{{ other.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </details>
+        {% endif %}
+      </div>
       <div class="related-videos">
 {% for altvid in seealso %}
         <a href="watch?v={{ altvid.id|url_encode }}" class="video-card">
           <img src="thumbs/{{ altvid.id|url_encode }}.jpg" alt="">
           <span>{{ altvid.title|e }}</span>
         </a>
+{% else %}
+        <p class="muted small">Aucune autre vidéo dans cette collection.</p>
 {% endfor %}
       </div>
     </div>

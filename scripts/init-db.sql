@@ -114,8 +114,10 @@ CREATE TABLE `videos` (
   `cdnurl` text CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
   `resolution` varchar(12) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `description` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `FK_COLLECTIONS` (`collection_id`),
+  KEY `idx_videos_collection_created` (`collection_id`, `created_at`),
   CONSTRAINT `fk_videos_collection` FOREIGN KEY (`collection_id`) REFERENCES `collections` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -242,4 +244,4 @@ INSERT INTO `collections` (`id`, `name`) VALUES (0, 'The default collection');
 INSERT INTO `user_groups` (`id`, `name`, `description`, `is_builtin`)
 VALUES (1, 'admin', 'Administrateurs : accès complet à toutes les collections et à l''administration', 1);
 
-INSERT INTO `schema_migrations` (`version`) VALUES ('001-auth'), ('002-tokens');
+INSERT INTO `schema_migrations` (`version`) VALUES ('001-auth'), ('002-tokens'), ('003-video-created-at');
