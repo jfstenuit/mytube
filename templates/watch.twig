@@ -1,35 +1,23 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="noindex,nofollow,noarchive">
+{% extends 'base.twig' %}
 
+{% block head %}
   {% for key, value in og %}
   <meta property="og:{{ key }}" content="{{ value|e('html_attr') }}" />
   {% endfor %}
 
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
   {% include 'partials/videojs-includes.twig' %}
   {% include 'partials/videojs-plugins.twig' %}
 
-  <link href="assets/css/style.css" rel="stylesheet">
   <link href="{{ og.image }}" rel="image_src">
   <link rel="alternate" type="application/json+oembed" href="{{ og.url|replace({'watch': 'oembed'}) }}" title="oEmbed JSON">
   <link rel="alternate" type="text/xml+oembed" href="{{ og.url|replace({'watch': 'oembed'}) }}&format=xml" title="oEmbed XML">
 
-  <script defer src="assets/js/mytube.js"></script>
+  <script defer src="{{ asset('assets/js/mytube.js') }}"></script>
+{% endblock %}
 
-  <title>{{ video.title|e }}</title>
-</head>
-<body>
+{% block title %}{{ video.title|e }}{% endblock %}
 
-  <header>
-    <img src="assets/img/logo.png" alt="Logo">
-    <h1>MyTube</h1>
-  </header>
-
+{% block content %}
   <main>
   <section class="video-section">
     <div class="video-container">
@@ -83,13 +71,9 @@
     {% endif %}
   </aside>
   </main>
+{% endblock %}
 
-  {% if footer_copyright %}
-  <footer>
-    {{ footer_copyright|raw }}
-  </footer>
-  {% endif %}
-
+{% block body_end %}
 <div id="embed-modal" class="modal" hidden>
   <div class="modal-backdrop" data-close></div>
   <div class="modal-content" role="dialog" aria-modal="true">
@@ -108,6 +92,4 @@
     <button data-close>Fermer</button>
   </div>
 </div>
-
-</body>
-</html>
+{% endblock %}

@@ -21,16 +21,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     player.chromecast();
 
+    // Canonical watch URL (the home page shows a random video under the root URL)
+    const shareUrl = document.querySelector('meta[property="og:url"]')?.content || window.location.href;
+
     document.getElementById('share-btn').addEventListener('click', async () => {
         if (navigator.share) {
             await navigator.share({
                 title: document.title,
                 text: "Regardez cette vidéo sur MyTube",
-                url: window.location.href
+                url: shareUrl
             });
         } else {
             // Fallback: copy to clipboard
-            navigator.clipboard.writeText(window.location.href);
+            navigator.clipboard.writeText(shareUrl);
             alert("Lien copié dans le presse-papiers !");
         }
     });

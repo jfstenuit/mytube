@@ -1,0 +1,37 @@
+{# Site header: branding on the left, login button or user menu on the right #}
+<header class="site-header">
+  <img src="assets/img/logo.png" alt="Logo">
+  <h1>MyTube</h1>
+
+  <nav class="user-nav" aria-label="Compte utilisateur">
+  {% if current_user %}
+    <div class="user-menu">
+      <button type="button" class="user-menu-toggle" aria-haspopup="menu" aria-expanded="false" aria-controls="user-menu-list">
+        <span class="avatar" aria-hidden="true">{{ current_user.display_name|first|upper }}</span>
+        <span class="user-name">{{ current_user.display_name }}</span>
+        <span class="material-icons" aria-hidden="true">expand_more</span>
+      </button>
+      <div id="user-menu-list" class="user-menu-list" role="menu" hidden>
+        <div class="user-menu-header">
+          <strong>{{ current_user.display_name }}</strong>
+          <span>{{ current_user.email }}</span>
+        </div>
+        {% if current_user.is_admin %}
+        <a role="menuitem" href="admin"><span class="material-icons" aria-hidden="true">admin_panel_settings</span>Administration</a>
+        {% endif %}
+        <a role="menuitem" href="account"><span class="material-icons" aria-hidden="true">person</span>Mon profil</a>
+        <a role="menuitem" href="account#password"><span class="material-icons" aria-hidden="true">lock</span>Changer le mot de passe</a>
+        <hr>
+        <form method="post" action="logout">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit" role="menuitem"><span class="material-icons" aria-hidden="true">logout</span>Se déconnecter</button>
+        </form>
+      </div>
+    </div>
+  {% else %}
+    <a class="btn btn-login" href="login?return={{ current_url|url_encode }}">
+      <span class="material-icons" aria-hidden="true">account_circle</span>Se connecter
+    </a>
+  {% endif %}
+  </nav>
+</header>

@@ -1,0 +1,30 @@
+{% extends 'base.twig' %}
+
+{% block title %}Connexion – MyTube{% endblock %}
+
+{% block content %}
+  <main class="page-narrow">
+    <section class="card">
+      <h2>Connexion</h2>
+
+      {% if notice %}<div class="alert alert-info" role="status">{{ notice }}</div>{% endif %}
+      {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+
+      <form method="post" action="login" class="form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="return" value="{{ return_to }}">
+
+        <label for="login-identifier">Nom d'utilisateur ou adresse e-mail</label>
+        <input id="login-identifier" name="identifier" type="text" value="{{ identifier }}"
+               autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
+
+        <label for="login-password">Mot de passe</label>
+        <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+
+        <button type="submit" class="btn btn-primary">Se connecter</button>
+      </form>
+
+      <p class="form-hint">Les comptes sont créés par un administrateur.</p>
+    </section>
+  </main>
+{% endblock %}

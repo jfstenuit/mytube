@@ -53,6 +53,7 @@ require __DIR__ . '/vendor/autoload.php';
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
 use App\Core\Config;
+use App\Core\Database;
 
 Config::load(__DIR__);
 
@@ -76,29 +77,112 @@ if ($_SERVER["SERVER_PORT"] != "80") {
  } else {
   $urlprefix .= $_SERVER["SERVER_NAME"];
 }
-$myurl=$urlprefix.$_SERVER['REQUEST_URI'];
-$action=basename(parse_url($myurl, PHP_URL_PATH));
-$urlprefix=$urlprefix.dirname(parse_url($myurl, PHP_URL_PATH));
-if (!preg_match('@/$@',$urlprefix)) $urlprefix=$urlprefix.'/';
+// Base path of the application (e.g. "/videos/"), taken from the location of
+// index.php so that the root URL and trailing slashes resolve correctly
+$basePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/') . '/';
+$requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$action = str_starts_with($requestPath, $basePath) ? substr($requestPath, strlen($basePath)) : '';
+if ($action === 'index.php') $action = '';
+$urlprefix .= $basePath;
+
+// --- User session (DRAFT: authentication is not implemented yet) ---
+$currentUser = null;
+
+// DRAFT: in development, ?preview_user=1 / ?preview_user=0 toggles a fake
+// logged-in user so the user menu and account page can be reviewed.
+// Remove once real authentication lands.
+if (Config::get('env') === 'development') {
+    if (isset($_GET['preview_user'])) {
+        $preview = $_GET['preview_user'] === '1';
+        setcookie('preview_user', $preview ? '1' : '', ['expires' => $preview ? 0 : 1, 'httponly' => true, 'samesite' => 'Lax']);
+        $_COOKIE['preview_user'] = $preview ? '1' : '';
+    }
+    if (!empty($_COOKIE['preview_user'])) {
+        $currentUser = [
+            'username' => 'demo',
+            'display_name' => 'Démo Utilisateur',
+            'email' => 'demo@example.com',
+            'is_admin' => true,
+            'groups' => ['admin', 'Famille'],
+        ];
+    }
+}
+
+// asset('assets/js/x.js') -> 'assets/js/x.js?v=<mtime>', so browsers fetch
+// the new version as soon as a file changes instead of using a stale cache
+$twig->addFunction(new \Twig\TwigFunction('asset', function (string $path): string {
+    $mtime = @filemtime(__DIR__ . '/' . $path);
+    return $mtime ? $path . '?v=' . $mtime : $path;
+}));
+
+$twig->addGlobal('current_user', $currentUser);
+$twig->addGlobal('csrf_token', '');
+$twig->addGlobal('current_url', $_SERVER['REQUEST_URI']);
+$twig->addGlobal('footer_copyright', Config::get('footer.copyright'));
+
+$draftNotice = 'Brouillon : l\'authentification n\'est pas encore implémentée.';
+
+if ($action == 'login') {
+    echo $twig->render('login.twig', [
+        'return_to' => $_GET['return'] ?? '',
+        'identifier' => $_POST['identifier'] ?? '',
+        'notice' => isset($_GET['logged_out']) ? 'Vous êtes déconnecté.' : null,
+        'error' => $_SERVER['REQUEST_METHOD'] === 'POST' ? $draftNotice : null,
+    ]);
+    exit(0);
+}
+
+if ($action == 'account') {
+    if (!$currentUser) {
+        header('Location: login?return=' . urlencode($_SERVER['REQUEST_URI']));
+        exit(0);
+    }
+    echo $twig->render('account.twig', [
+        'error' => $_SERVER['REQUEST_METHOD'] === 'POST' ? $draftNotice : null,
+    ]);
+    exit(0);
+}
+
+if ($action == 'logout') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        exit('Method Not Allowed');
+    }
+    setcookie('preview_user', '', ['expires' => 1, 'httponly' => true, 'samesite' => 'Lax']);
+    header('Location: login?logged_out=1');
+    exit(0);
+}
+
+// The home page is the watch page of a randomly selected video
+$isHome = ($action === '');
+if ($isHome) $action = 'watch';
+
 if (($action!='watch') && ($action!='embed') && ($action!='oembed')) {
 	header("HTTP/1.0 404 Not Found");
     echo $twig->render('404.twig');
 	exit(0);
 }
 
-$v=$_GET["v"];
+$dbh = Database::get();
+
+if ($isHome) {
+    // Home page: show a random public video
+    $v = $dbh->query("SELECT id FROM videos WHERE visibility = 'public' ORDER BY RAND() LIMIT 1")->fetchColumn();
+    if ($v === false) {
+        http_response_code(404);
+        echo $twig->render('404.twig');
+        exit(0);
+    }
+    // A different video on each visit: never cache this response
+    header('Cache-Control: no-store');
+} else {
+    $v = $_GET["v"] ?? '';
+}
+
 if (!preg_match('/^[A-Za-z0-9_-]{12}$/', $v)) {
     http_response_code(400);
     exit('Invalid video ID');
 }
-
-$dbh = new PDO(
-    'mysql:host=' . Config::get('db.host') . ';dbname=' . Config::get('db.name') . ';charset=utf8',
-    Config::get('db.user'),
-    Config::get('db.pass')
-);
-$dbh->setAttribute( PDO::ATTR_EMULATE_PREPARES, false );
-$dbh->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 
 $query = "SELECT * FROM videos WHERE videos.id=?";
 $sth = $dbh->prepare($query);
@@ -199,7 +283,6 @@ $context = [
     'video' => $video,
     'seealso' => $seealso,
     'urlprefix' => $urlprefix,
-    'footer_copyright' => Config::get('footer.copyright'),
     'bmc_enabled' => Config::get('bmc.enabled'),
     'bmc_slug' => Config::get('bmc.slug'),
     'bmc_button_text' => Config::get('bmc.button_text')
