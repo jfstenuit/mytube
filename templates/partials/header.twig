@@ -1,7 +1,9 @@
 {# Site header: branding on the left, login button or user menu on the right #}
 <header class="site-header">
-  <img src="assets/img/logo.png" alt="Logo">
-  <h1>MyTube</h1>
+  <a class="brand" href="./" title="Accueil">
+    <img src="assets/img/logo.png" alt="">
+    <h1>MyTube</h1>
+  </a>
 
   <nav class="user-nav" aria-label="Compte utilisateur">
   {% if current_user %}
