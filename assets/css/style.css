@@ -1132,3 +1132,64 @@ main.page-admin {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ---- Welcome page (home without any listed video) ---- */
+
+.welcome-art {
+  display: block;
+}
+
+.video-description p:first-child {
+  margin-top: 0;
+}
+
+.video-description a {
+  color: var(--accent);
+}
+
+.welcome-access h3 {
+  margin-top: 0;
+}
+
+.welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+/* ---- Narrow screens: single column, compact header ---- */
+
+@media (max-width: 768px) {
+  /* In the column layout, the desktop flex-basis would act as a minimum height */
+  .video-section,
+  .sidebar,
+  aside {
+    flex-basis: auto;
+  }
+}
+
+.btn-login {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  /* Icon-only login button; the label stays available to screen readers */
+  .btn-login {
+    padding: 0.5rem;
+  }
+
+  .btn-login .btn-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .btn-login .material-icons {
+    font-size: 1.6rem;
+  }
+}

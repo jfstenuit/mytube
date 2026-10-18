@@ -10,14 +10,11 @@ use PDO;
 
 class VideoController
 {
-    /** Session key: collections whose unlisted videos the visitor reached by link */
-    private const LINK_COLLECTIONS = 'access.link_collections';
-
     private Access $access;
 
     public function __construct(private App $app)
     {
-        $this->access = new Access($app->db(), $app->auth->user(), $app->session->get(self::LINK_COLLECTIONS, []));
+        $this->access = new Access($app->db(), $app->auth->user());
     }
 
     /** Home page: watch page of a random video among those listed for this viewer */
@@ -28,12 +25,28 @@ class VideoController
         $sth->execute($params);
         $v = $sth->fetchColumn();
         if ($v === false) {
-            $this->app->notFound();
+            $this->welcome();
             return;
         }
         // A different video on each visit: never cache this response
         header('Cache-Control: no-store');
         $this->show('watch', $v);
+    }
+
+    /**
+     * Home page when no video is listed for this viewer (e.g. only unlisted and private
+     * videos): the watch layout with an illustration instead of the player.
+     */
+    private function welcome(): void
+    {
+        $user = $this->app->auth->user();
+        header('Vary: Cookie');
+        $this->app->render('welcome.twig', [
+            'state' => $user === null ? 'anonymous' : ($user->isAdmin() ? 'admin' : 'member'),
+            'bmc_enabled' => Config::get('bmc.enabled'),
+            'bmc_slug' => Config::get('bmc.slug'),
+            'bmc_button_text' => Config::get('bmc.button_text'),
+        ]);
     }
 
     public function watch(): void
@@ -76,16 +89,6 @@ class VideoController
             $this->denied($mode);
             return;
         }
-        // A link to an unlisted video opens up the other unlisted videos of its collection
-        // for the rest of the visit (this is how unlisted collections are shared)
-        if ($mode === 'watch' && $video['visibility'] === 'unlisted') {
-            $collectionId = (int) $video['collection_id'];
-            $this->access->addLinkCollection($collectionId);
-            $linked = $app->session->get(self::LINK_COLLECTIONS, []);
-            if (!in_array($collectionId, $linked, true)) {
-                $app->session->set(self::LINK_COLLECTIONS, array_merge($linked, [$collectionId]));
-            }
-        }
 
         // we have a path from the DB - now check if it's a mp4 file, a m3u8 or if it's missing
         $media = (new MediaLibrary($app->rootDir . '/media'))->locate($video['path']);
@@ -123,8 +126,10 @@ class VideoController
             }
         }
 
-        // Other videos of the collection that this viewer may see listed
-        [$listable, $params] = $this->access->listableCondition('v');
+        // Other videos of the collection that this viewer may see listed. On an unlisted video's
+        // page, its unlisted siblings are listed too: sharing one link shares the collection.
+        [$listable, $params] = $this->access->listableCondition('v',
+            $video['visibility'] === 'unlisted' ? (int) $video['collection_id'] : null);
         $sth = $dbh->prepare("SELECT v.* FROM videos v WHERE v.collection_id = ? AND v.id != ? AND $listable ORDER BY v.title");
         $sth->execute(array_merge([$video['collection_id'], $v], $params));
         $seealso = $sth->fetchAll(PDO::FETCH_ASSOC);

@@ -1,0 +1,92 @@
+{% extends 'base.twig' %}
+
+{% block head %}
+  <meta property="og:title" content="{{ site_name }}" />
+  <meta property="og:type" content="website" />
+{% endblock %}
+
+{% block title %}{{ site_name }}{% endblock %}
+
+{% block content %}
+  <main>
+  <section class="video-section">
+    {# Same 16:9 frame as the player, with an illustration instead of a video #}
+    <div class="video-container">
+      <div class="video-wrapper" style="position: relative; width: 100%; padding-top: 56.25%;">
+        <svg class="welcome-art" viewBox="0 0 1600 900" role="img" aria-label="Aucune vidéo à afficher"
+             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+          <defs>
+            <linearGradient id="welcome-bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#1c1c1c"/>
+              <stop offset="1" stop-color="#050505"/>
+            </linearGradient>
+            <radialGradient id="welcome-glow" cx="0.5" cy="0.45" r="0.5">
+              <stop offset="0" stop-color="#cc0000" stop-opacity="0.35"/>
+              <stop offset="1" stop-color="#cc0000" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect width="1600" height="900" fill="url(#welcome-bg)"/>
+          <rect width="1600" height="900" fill="url(#welcome-glow)"/>
+          {# Film strip perforations, top and bottom #}
+          <g fill="#ffffff" fill-opacity="0.06">
+            {% for i in 0..19 %}
+            <rect x="{{ 20 + i * 80 }}" y="28" width="44" height="30" rx="6"/>
+            <rect x="{{ 20 + i * 80 }}" y="842" width="44" height="30" rx="6"/>
+            {% endfor %}
+          </g>
+          {# Play button #}
+          <circle cx="800" cy="405" r="150" fill="none" stroke="#ffffff" stroke-opacity="0.85" stroke-width="14"/>
+          <path d="M752 325 L752 485 L892 405 Z" fill="#cc0000"/>
+          <text x="800" y="660" text-anchor="middle" fill="#ffffff" fill-opacity="0.9"
+                font-family="system-ui, sans-serif" font-size="64" font-weight="700">{{ site_name }}</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="video-meta">
+      <h2>Bienvenue sur {{ site_name }}</h2>
+    </div>
+
+    <div class="video-description">
+      {% if state == 'anonymous' %}
+        <p>Les vidéos de ce site sont partagées sur invitation : aucune n'est publique pour l'instant.</p>
+        <p>Si vous avez reçu un lien vers une vidéo, ouvrez-le directement. Si vous avez un compte,
+          connectez-vous pour accéder aux collections qui vous sont ouvertes.</p>
+      {% elseif state == 'member' %}
+        <p>Aucune vidéo ne vous est accessible pour l'instant.</p>
+        <p>Si vous attendiez l'accès à une collection, contactez l'administrateur du site. Vous pouvez
+          aussi ouvrir directement un lien de vidéo que l'on vous aurait envoyé.</p>
+      {% else %}
+        <p>Le catalogue ne contient encore aucune vidéo.</p>
+        <p><a href="admin/media">Ajouter une vidéo</a> depuis les fichiers présents dans <code>media/</code>.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  <aside class="sidebar">
+    {% if state == 'anonymous' %}
+    <div class="section welcome-access">
+      <h3>Accès</h3>
+      <p class="muted small">Connectez-vous pour voir les vidéos de vos collections.</p>
+      <div class="welcome-actions">
+        <a class="btn btn-primary" href="login">
+          <span class="material-icons" aria-hidden="true">login</span>Se connecter
+        </a>
+        <a class="btn btn-small" href="register">Créer un compte</a>
+      </div>
+    </div>
+    {% endif %}
+    {% if bmc_enabled and bmc_slug %}
+    <div class="section">
+      <h3>Soutenez mon travail</h3>
+
+      <script src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+        data-name="bmc-button" data-slug="{{ bmc_slug|e('html_attr') }}" data-color="#FFDD00"
+        data-emoji="" data-font="Cookie" data-text="{{ bmc_button_text|e('html_attr') }}"
+        data-outline-color="#000000" data-font-color="#000000"
+        data-coffee-color="#ffffff"></script>
+    </div>
+    {% endif %}
+  </aside>
+  </main>
+{% endblock %}

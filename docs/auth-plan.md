@@ -28,19 +28,18 @@ Status legend: ✅ done · 🟡 drafted · 🔨 in progress · ⬜ to do
 | Visibility | Who can watch                                        | Listed in "Dans la même collection" |
 |------------|------------------------------------------------------|-------------------------------------|
 | `public`   | Everyone                                             | Everyone                            |
-| `unlisted` | Everyone with the link                               | Viewers with collection access, and visitors who opened an unlisted link of that collection (for their session) |
+| `unlisted` | Everyone with the link                               | Viewers with collection access, and anyone on the page of another unlisted video of the same collection |
 | `private`  | Admins, and members of a group granted the collection | Only viewers with collection access |
 
 "Collection access" means `admin` membership, or membership of any group listed
 in `group_collections` for the video's `collection_id`. Self-registered users
 start with no group, so they see public videos only until an admin adds them to one.
 
-**Sharing an unlisted collection** (checkpoint 6, the most common use): a visitor who opens the
-link of an unlisted video can browse all the other unlisted videos of the same collection. The
-collection is remembered in the session (2 h idle, 24 h at most), so it stays unlocked while
-browsing that collection, including from a public sibling. Opening a *public* video unlocks
-nothing, so unlisted videos never surface from the home page. A session cookie is only set when
-an unlisted link is opened; public pages remain cookie-free.
+**Sharing an unlisted collection** (checkpoint 6, the most common use): on the page of an unlisted
+video, the sidebar also lists the other unlisted videos of its collection, so whoever receives one
+link can browse the collection. It's decided only from the page being viewed: nothing is
+remembered (no cookie, no timeout), and the home page and public pages never list unlisted videos.
+(A first version kept the unlocked collection in the session; replaced because it lingered.)
 
 When a private video is denied:
 - **anonymous** → redirect to `login?return=…` (the shared link still works once the user logs in);
@@ -158,7 +157,10 @@ Planned as:
   access get the 404 page. `embed`: 404. `oembed`: 401 (oEmbed specification). `Vary: Cookie` on
   watch pages, since the sidebar depends on the viewer.
 - Home page: random pick among the videos listed for the viewer (logged-in users with collection
-  access also get unlisted and private videos of those collections).
+  access also get unlisted and private videos of those collections). When nothing is listed (e.g.
+  only unlisted and private videos), a **welcome page** in the watch layout replaces it, with an
+  illustration in the player frame and a text adapted to anonymous visitors (open your link or log
+  in), members without access, or admins with an empty catalogue (checkpoint 6).
 - Sidebar (decided at checkpoint 4, after a mock): "Collection" label and current collection name,
   then the *other* listed videos of that collection. An **"Autres collections"** menu, shown only
   when the viewer can see other collections, lists their names (no counts); each opens its

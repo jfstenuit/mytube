@@ -7,8 +7,8 @@ use PDO;
 /**
  * Video access rules (docs/auth-plan.md, "Access rules"):
  * - public: everyone can watch; listed for everyone
- * - unlisted: everyone with the link can watch; listed with collection access, or once the
- *   viewer has opened an unlisted link of that collection ("link collections", kept in the session)
+ * - unlisted: everyone with the link can watch; listed with collection access, and on the page
+ *   of another unlisted video of the same collection (sharing an unlisted collection by link)
  * - private: only with collection access
  * Collection access: admin group, or a group granted the collection (group_collections).
  */
@@ -18,16 +18,8 @@ class Access
     private ?array $granted = null;
     private bool $resolved = false;
 
-    /** @param int[] $linkCollections collections whose unlisted videos this viewer reached by link */
-    public function __construct(private PDO $db, private ?User $user, private array $linkCollections = [])
+    public function __construct(private PDO $db, private ?User $user)
     {
-    }
-
-    public function addLinkCollection(int $collectionId): void
-    {
-        if (!in_array($collectionId, $this->linkCollections, true)) {
-            $this->linkCollections[] = $collectionId;
-        }
     }
 
     public function canView(array $video): bool
@@ -43,9 +35,11 @@ class Access
 
     /**
      * SQL condition selecting the videos this viewer may see in listings.
+     * $unlistedCollection: also list the unlisted videos of this collection (used on the page of
+     * an unlisted video, so that a shared link opens up its collection; nothing is remembered).
      * @return array{0: string, 1: array} [condition on $alias, positional parameters]
      */
-    public function listableCondition(string $alias = 'v'): array
+    public function listableCondition(string $alias = 'v', ?int $unlistedCollection = null): array
     {
         $granted = $this->grantedCollections();
         if ($granted === null) {
@@ -57,10 +51,9 @@ class Access
             $conditions[] = "$alias.collection_id IN (" . self::placeholders($granted) . ')';
             $params = array_merge($params, $granted);
         }
-        $linked = array_values(array_diff($this->linkCollections, $granted));
-        if ($linked) {
-            $conditions[] = "($alias.visibility = 'unlisted' AND $alias.collection_id IN (" . self::placeholders($linked) . '))';
-            $params = array_merge($params, $linked);
+        if ($unlistedCollection !== null && !in_array($unlistedCollection, $granted, true)) {
+            $conditions[] = "($alias.visibility = 'unlisted' AND $alias.collection_id = ?)";
+            $params[] = $unlistedCollection;
         }
         return ['(' . implode(' OR ', $conditions) . ')', $params];
     }
