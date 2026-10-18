@@ -12,6 +12,7 @@ if (PHP_SAPI !== 'cli') {
 require __DIR__ . '/../vendor/autoload.php';
 
 use App\Core\Config;
+use App\Auth\Passwords;
 use App\Core\Database;
 use App\Models\User;
 
@@ -76,7 +77,7 @@ try {
         'INSERT INTO users (username, email, email_verified_at, display_name, password_hash, password_changed_at)
          VALUES (?, ?, NOW(), ?, ?, NOW())'
     );
-    $sth->execute([$username, $email, $displayName ?: $username, password_hash($password, PASSWORD_DEFAULT)]);
+    $sth->execute([$username, $email, $displayName ?: $username, Passwords::hash($password)]);
     $userId = (int) $dbh->lastInsertId();
 
     if ($isAdmin) {

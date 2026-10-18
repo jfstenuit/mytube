@@ -17,6 +17,7 @@ class Throttle
         'login'    => ['window' => 900,  'subject' => 5, 'ip' => 20, 'failures_only' => true],
         'register' => ['window' => 3600, 'subject' => 3, 'ip' => 10, 'failures_only' => false],
         'reset'    => ['window' => 3600, 'subject' => 3, 'ip' => 10, 'failures_only' => false],
+        'resend'   => ['window' => 3600, 'subject' => 3, 'ip' => 10, 'failures_only' => false],
     ];
 
     public function __construct(private PDO $db)

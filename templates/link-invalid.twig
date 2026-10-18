@@ -1,0 +1,17 @@
+{% extends 'base.twig' %}
+
+{% block title %}Lien invalide – MyTube{% endblock %}
+
+{% block content %}
+  <main class="page-narrow">
+    <section class="card">
+      <h2>Lien invalide ou expiré</h2>
+      <p>Ce lien n'est plus valable : il a peut-être déjà été utilisé, ou il a expiré.</p>
+      {% if resend %}
+      <p><a href="resend-verification">Recevoir un nouveau lien de confirmation</a></p>
+      {% else %}
+      <p><a href="forgot-password">Demander un nouveau lien de réinitialisation</a></p>
+      {% endif %}
+    </section>
+  </main>
+{% endblock %}

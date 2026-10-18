@@ -1,0 +1,31 @@
+{% extends 'base.twig' %}
+
+{% block head %}{% include 'partials/recaptcha-head.twig' %}{% endblock %}
+
+{% block title %}Renvoyer la confirmation – MyTube{% endblock %}
+
+{% block content %}
+  <main class="page-narrow">
+    <section class="card">
+      <h2>Renvoyer l'e-mail de confirmation</h2>
+
+      {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+
+      <p>Vous n'avez pas reçu le lien de confirmation, ou il a expiré ? Indiquez l'adresse utilisée lors de l'inscription.</p>
+
+      <form method="post" action="resend-verification" class="form" data-recaptcha-action="resend_verification">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <label for="resend-email">Adresse e-mail</label>
+        <input id="resend-email" name="email" type="email" value="{{ email }}" maxlength="255"
+               autocomplete="email" required autofocus>
+
+        {% include 'partials/recaptcha-field.twig' %}
+
+        <button type="submit" class="btn btn-primary">Renvoyer</button>
+      </form>
+    </section>
+
+    <p class="page-links"><a href="login">Retour à la connexion</a></p>
+  </main>
+{% endblock %}

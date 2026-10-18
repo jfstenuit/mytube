@@ -23,21 +23,31 @@ class AuthController
 
         $identifier = '';
         $error = null;
+        $showResend = false;
         $status = 200;
         if ($request->isPost()) {
             if (!$app->checkCsrf()) {
                 return;
             }
             $identifier = trim($request->input('identifier', ''));
+            if ($error = $app->recaptchaError('login', strict: false)) {
+                $app->render('login.twig', [
+                    'return_to' => $returnTo,
+                    'identifier' => $identifier,
+                    'error' => $error,
+                ], 403);
+                return;
+            }
             $result = $app->auth->attempt($identifier, $request->input('password', ''), $request->input('remember') === '1');
             if ($result === Auth::OK) {
                 $app->redirect($returnTo);
                 return;
             }
+            $showResend = $result === Auth::UNVERIFIED;
             [$status, $error] = match ($result) {
                 Auth::THROTTLED => [429, 'Trop de tentatives de connexion. Veuillez réessayer dans quelques minutes.'],
                 Auth::INACTIVE => [403, 'Ce compte est désactivé.'],
-                Auth::UNVERIFIED => [403, 'Votre adresse e-mail n\'a pas encore été vérifiée. Consultez le message de confirmation que vous avez reçu.'],
+                Auth::UNVERIFIED => [403, 'Votre adresse e-mail n\'a pas encore été vérifiée. Cliquez sur le lien du message de confirmation que vous avez reçu.'],
                 default => [401, 'Identifiant ou mot de passe incorrect.'],
             };
         }
@@ -46,6 +56,7 @@ class AuthController
             'return_to' => $returnTo,
             'identifier' => $identifier,
             'error' => $error,
+            'show_resend' => $showResend,
         ], $status);
     }
 

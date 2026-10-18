@@ -1,0 +1,6 @@
+{# Invisible reCAPTCHA: include in the head block of pages with protected forms #}
+{% if recaptcha_site_key %}
+  <meta name="recaptcha-site-key" content="{{ recaptcha_site_key }}" data-enterprise="{{ recaptcha_enterprise ? '1' : '0' }}">
+  <script async src="https://www.google.com/recaptcha/{{ recaptcha_enterprise ? 'enterprise' : 'api' }}.js?render={{ recaptcha_site_key|url_encode }}&amp;hl=fr"></script>
+  <script defer src="{{ asset('assets/js/recaptcha.js') }}"></script>
+{% endif %}

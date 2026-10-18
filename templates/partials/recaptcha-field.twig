@@ -1,0 +1,6 @@
+{# Inside a form with data-recaptcha-action="…": token filled in on submit by recaptcha.js.
+   The badge is hidden (see style.css), so Google requires this notice instead. #}
+{% if recaptcha_site_key %}
+  <input type="hidden" name="recaptcha_token" value="">
+  <p class="form-hint recaptcha-notice">Ce site est protégé par reCAPTCHA.</p>
+{% endif %}

@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use App\Auth\Passwords;
 use PDO;
 
 class User
@@ -43,6 +44,23 @@ class User
         return self::hydrate($db, $sth->fetch(PDO::FETCH_ASSOC));
     }
 
+    /** @return int id of the new user */
+    public static function create(PDO $db, string $username, string $email, string $displayName,
+                                  ?string $passwordHash, bool $emailVerified = false): int
+    {
+        $sth = $db->prepare('INSERT INTO users (username, email, email_verified_at, display_name, password_hash, password_changed_at)
+            VALUES (?, ?, IF(?, NOW(), NULL), ?, ?, NOW())');
+        $sth->execute([$username, $email, (int) $emailVerified, $displayName, $passwordHash]);
+        return (int) $db->lastInsertId();
+    }
+
+    public static function usernameExists(PDO $db, string $username): bool
+    {
+        $sth = $db->prepare('SELECT 1 FROM users WHERE username = ?');
+        $sth->execute([$username]);
+        return (bool) $sth->fetchColumn();
+    }
+
     private static function hydrate(PDO $db, array|false $row): ?self
     {
         if (!$row) {
@@ -77,7 +95,7 @@ class User
 
     public function passwordNeedsRehash(): bool
     {
-        return $this->hasPassword() && password_needs_rehash($this->passwordHash, PASSWORD_DEFAULT);
+        return $this->hasPassword() && Passwords::needsRehash($this->passwordHash);
     }
 
     public function isAdmin(): bool

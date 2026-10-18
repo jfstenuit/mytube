@@ -1,0 +1,16 @@
+{% block subject %}{{ site_name }} : tentative d'inscription avec votre adresse{% endblock %}
+
+{% block text %}
+Bonjour,
+
+Quelqu'un (peut-être vous) a essayé de créer un compte sur {{ site_name }}
+avec cette adresse e-mail. Vous avez déjà un compte, avec le nom d'utilisateur
+« {{ username }} ».
+
+Si vous avez oublié votre mot de passe, vous pouvez en choisir un nouveau ici :
+
+{{ forgot_url }}
+
+Si vous n'êtes pas à l'origine de cette demande, ignorez simplement ce message :
+votre compte n'a pas été modifié.
+{% endblock %}

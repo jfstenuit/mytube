@@ -1,5 +1,7 @@
 {% extends 'base.twig' %}
 
+{% block head %}{% include 'partials/recaptcha-head.twig' %}{% endblock %}
+
 {% block title %}Connexion – MyTube{% endblock %}
 
 {% block content %}
@@ -7,9 +9,14 @@
     <section class="card">
       <h2>Connexion</h2>
 
-      {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+      {% if error %}
+      <div class="alert alert-error" role="alert">
+        {{ error }}
+        {% if show_resend %}<a href="resend-verification">Renvoyer l'e-mail de confirmation</a>{% endif %}
+      </div>
+      {% endif %}
 
-      <form method="post" action="login" class="form">
+      <form method="post" action="login" class="form" data-recaptcha-action="login">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="return" value="{{ return_to }}">
 
@@ -20,13 +27,20 @@
         <label for="login-password">Mot de passe</label>
         <input id="login-password" name="password" type="password" autocomplete="current-password" required>
 
-        <label class="checkbox">
-          <input type="checkbox" name="remember" value="1">
-          Se souvenir de moi
-        </label>
+        <div class="form-row">
+          <label class="checkbox">
+            <input type="checkbox" name="remember" value="1">
+            Se souvenir de moi
+          </label>
+          <a href="forgot-password">Mot de passe oublié ?</a>
+        </div>
+
+        {% include 'partials/recaptcha-field.twig' %}
 
         <button type="submit" class="btn btn-primary">Se connecter</button>
       </form>
     </section>
+
+    <p class="page-links">Pas encore de compte ? <a href="register">Créer un compte</a></p>
   </main>
 {% endblock %}

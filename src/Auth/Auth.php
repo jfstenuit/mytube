@@ -24,8 +24,6 @@ class Auth
     public const REMEMBER_COOKIE = 'mytube_remember';
     private const REMEMBER_TTL = 30 * 86400;
 
-    /** Verified against when the account doesn't exist, so timing doesn't reveal it */
-    private const DUMMY_HASH = '$2y$12$3erk3MHFE0VTOmy757/KWuhvy6hrqxL50Lljjfhmcfrtld7Zs64Nq';
 
     private ?User $user = null;
     private bool $resolved = false;
@@ -78,7 +76,8 @@ class Auth
 
         $user = $identifier !== '' ? User::findByIdentifier($this->db, $identifier) : null;
         if ($user === null || !$user->hasPassword()) {
-            password_verify($password, self::DUMMY_HASH);
+            // Same cost as a real verification, so timing doesn't reveal unknown accounts
+            Passwords::hash($password);
             $this->throttle->record('login', $identifier, $this->clientIp, false);
             return self::INVALID;
         }
@@ -97,7 +96,7 @@ class Auth
         $this->throttle->record('login', $identifier, $this->clientIp, true);
         if ($user->passwordNeedsRehash()) {
             $this->db->prepare('UPDATE users SET password_hash = ? WHERE id = ?')
-                ->execute([password_hash($password, PASSWORD_DEFAULT), $user->id]);
+                ->execute([Passwords::hash($password), $user->id]);
         }
 
         $this->login($user, 'password');
@@ -114,7 +113,8 @@ class Auth
         $this->session->regenerate();
         $this->csrf->reset();
         $this->session->set('auth.user_id', $user->id);
-        $this->session->set('auth.login_at', time());
+        // Never earlier than the last password change (clock skew between PHP and the database)
+        $this->session->set('auth.login_at', max(time(), $user->passwordChangedTs));
         $this->session->set('auth.method', $method);
         $this->db->prepare('UPDATE users SET last_login_at = NOW() WHERE id = ?')->execute([$user->id]);
 

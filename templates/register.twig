@@ -1,0 +1,59 @@
+{% extends 'base.twig' %}
+
+{% block head %}{% include 'partials/recaptcha-head.twig' %}{% endblock %}
+
+{% block title %}Créer un compte – MyTube{% endblock %}
+
+{% block content %}
+  <main class="page-narrow">
+    <section class="card">
+      <h2>Créer un compte</h2>
+
+      {% if errors %}
+      <div class="alert alert-error" role="alert">
+        {% if errors|length == 1 %}{{ errors|first }}{% else %}
+        <ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <form method="post" action="register" class="form" data-recaptcha-action="register">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <label for="register-username">Nom d'utilisateur</label>
+        <input id="register-username" name="username" type="text" value="{{ form.username }}"
+               pattern="[A-Za-z0-9._\-]{3,64}" minlength="3" maxlength="64"
+               autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
+        <p class="form-hint">3 à 64 caractères : lettres, chiffres, « . », « _ » ou « - ».</p>
+
+        <label for="register-display-name">Nom affiché <span class="optional">(facultatif)</span></label>
+        <input id="register-display-name" name="display_name" type="text" value="{{ form.display_name }}"
+               maxlength="255" autocomplete="name">
+
+        <label for="register-email">Adresse e-mail</label>
+        <input id="register-email" name="email" type="email" value="{{ form.email }}"
+               maxlength="255" autocomplete="email" required>
+        <p class="form-hint">Un lien de confirmation vous sera envoyé.</p>
+
+        <label for="register-password">Mot de passe</label>
+        <input id="register-password" name="password" type="password" autocomplete="new-password" minlength="10" required>
+
+        <label for="register-password-confirm">Confirmer le mot de passe</label>
+        <input id="register-password-confirm" name="password_confirm" type="password" autocomplete="new-password" minlength="10" required>
+        <p class="form-hint">Au moins 10 caractères.</p>
+
+        {# Honeypot: hidden from humans, bots tend to fill it in #}
+        <div class="hp-field" aria-hidden="true">
+          <label for="register-website">Site web</label>
+          <input id="register-website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+
+        {% include 'partials/recaptcha-field.twig' %}
+
+        <button type="submit" class="btn btn-primary">Créer mon compte</button>
+      </form>
+    </section>
+
+    <p class="page-links">Déjà un compte ? <a href="login">Se connecter</a></p>
+  </main>
+{% endblock %}

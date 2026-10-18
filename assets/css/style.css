@@ -11,6 +11,8 @@
       --info-text: #1a4a9c;
       --error-bg: #fdecea;
       --error-text: #a3170f;
+      --success-bg: #e6f4ea;
+      --success-text: #1e6b34;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -27,6 +29,8 @@
         --info-text: #a8c7fa;
         --error-bg: #3b1a17;
         --error-text: #f6aea8;
+        --success-bg: #173322;
+        --success-text: #9bd8ad;
       }
     }
 
@@ -302,6 +306,63 @@ main.page-narrow {
 .alert-error {
   background: var(--error-bg);
   color: var(--error-text);
+}
+
+.alert-success {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.alert a {
+  color: inherit;
+  font-weight: 500;
+}
+
+.alert ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.form-row label.checkbox {
+  margin-top: 0;
+}
+
+.card a,
+.page-links a {
+  color: var(--accent);
+}
+
+.page-links {
+  text-align: center;
+  margin: 0;
+}
+
+.optional {
+  font-weight: normal;
+  color: var(--muted);
+}
+
+/* Honeypot field: off-screen for humans, still present for bots */
+.hp-field {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* The reCAPTCHA badge is replaced by a text notice in each protected form */
+.grecaptcha-badge {
+  visibility: hidden;
 }
 
 @media (max-width: 600px) {

@@ -1,0 +1,15 @@
+{% block subject %}{{ site_name }} : confirmez votre adresse e-mail{% endblock %}
+
+{% block text %}
+Bonjour {{ name }},
+
+Merci de votre inscription sur {{ site_name }}. Pour activer votre compte,
+confirmez votre adresse e-mail en ouvrant ce lien :
+
+{{ verify_url }}
+
+Ce lien est valable {{ hours }} heures. Sans confirmation, l'inscription est
+annulée automatiquement.
+
+Si vous n'êtes pas à l'origine de cette inscription, ignorez simplement ce message.
+{% endblock %}

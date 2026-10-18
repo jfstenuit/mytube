@@ -9,8 +9,8 @@ use Twig\Environment;
 /**
  * Sends mail through the SMTP smarthost configured in .env.
  *
- * Messages are Twig templates in templates/mail/ defining the blocks
- * "subject" and "text", and optionally "html".
+ * Messages are plain-text Twig templates, templates/mail/NAME.txt.twig (the
+ * .txt extension disables HTML escaping), defining the blocks "subject" and "text".
  */
 class Mailer
 {
@@ -20,7 +20,7 @@ class Mailer
 
     public function send(string $toAddress, string $toName, string $template, array $context = []): void
     {
-        $tpl = $this->twig->load("mail/$template.twig");
+        $tpl = $this->twig->load("mail/$template.txt.twig");
         $context += ['site_name' => Config::get('site.name')];
 
         $mail = new PHPMailer(true);
@@ -44,17 +44,11 @@ class Mailer
             }
 
             $mail->CharSet = PHPMailer::CHARSET_UTF8;
+            $mail->XMailer = ' ';  // don't advertise the mailer library
             $mail->setFrom(Config::get('mail.from'), Config::get('mail.from_name'));
             $mail->addAddress($toAddress, $toName);
             $mail->Subject = trim($tpl->renderBlock('subject', $context));
-            $text = trim($tpl->renderBlock('text', $context)) . "\n";
-            if ($tpl->hasBlock('html', $context)) {
-                $mail->isHTML(true);
-                $mail->Body = $tpl->renderBlock('html', $context);
-                $mail->AltBody = $text;
-            } else {
-                $mail->Body = $text;
-            }
+            $mail->Body = trim($tpl->renderBlock('text', $context)) . "\n";
             $mail->send();
         } catch (MailerException $e) {
             throw new RuntimeException('Mail delivery failed: ' . $mail->ErrorInfo, 0, $e);

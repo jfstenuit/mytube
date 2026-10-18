@@ -33,6 +33,12 @@ class Config
                 'smtp.secure'      => $_ENV['SMTP_SECURE']      ?? '',
                 'mail.from'        => $_ENV['MAIL_FROM']        ?? '',
                 'mail.from_name'   => $_ENV['MAIL_FROM_NAME']   ?? 'MyTube',
+                'recaptcha.site_key'   => $_ENV['RECAPTCHA_SITE_KEY']   ?? '',
+                'recaptcha.mode'       => $_ENV['RECAPTCHA_MODE']       ?? 'assessment',
+                'recaptcha.project_id' => $_ENV['RECAPTCHA_PROJECT_ID'] ?? '',
+                'recaptcha.api_key'    => $_ENV['RECAPTCHA_API_KEY']    ?? '',
+                'recaptcha.secret_key' => $_ENV['RECAPTCHA_SECRET_KEY'] ?? '',
+                'recaptcha.min_score'  => (float) ($_ENV['RECAPTCHA_MIN_SCORE'] ?? 0.5),
             ];
         }
     }

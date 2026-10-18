@@ -122,7 +122,19 @@ Notes from implementation:
   `SMTP_PASS`, `SMTP_SECURE`, `MAIL_FROM`, `MAIL_FROM_NAME`), with Twig templates for messages
 - Remove the `preview_user` draft hack
 
-### 3b. Registration, email verification, password reset ⬜
+### 3b. Registration, email verification, password reset ✅
+Implemented as below, plus invisible **reCAPTCHA** from day one (setup: [recaptcha.md](recaptcha.md)):
+strict on registration, forgot password and resend confirmation; lenient on login (a low score is
+refused, an unavailable check is not). Other details:
+- Unverified accounts are deleted after 7 days, so abandoned sign-ups don't hold usernames.
+- The reset link's token moves into the session on first use (no token in the address bar,
+  history or `Referer`). A successful reset also marks the email as verified, and a
+  "password changed" notice is mailed.
+- Links in emails are built from `SITE_URL`, never from the request's Host header.
+- New passwords are hashed with Argon2id (older bcrypt hashes upgrade at the next login).
+- Mail templates are `templates/mail/*.txt.twig` (plain text, no HTML escaping).
+
+Planned as:
 - `register`: username, display name, email, password (≥ 10 characters, confirmed), a honeypot
   field, and throttling per IP. CAPTCHA will plug in here later.
 - The account is created unverified and a `verify_email` link is sent (valid 48 h). The login page
