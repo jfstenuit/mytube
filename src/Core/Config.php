@@ -22,6 +22,7 @@ class Config
                 'site.name'        => $_ENV['SITE_NAME']        ?? 'MyTube',
                 'env'              => $_ENV['APP_ENV']          ?? 'production',
                 'timezone'         => $_ENV['APP_TIMEZONE']     ?? 'Europe/Brussels',
+                'app.secret'       => $_ENV['APP_SECRET']       ?? '',
                 'trusted_proxies'  => array_filter(array_map('trim', explode(',', $_ENV['TRUSTED_PROXIES'] ?? ''))),
                 'footer.copyright' => $_ENV['FOOTER_COPYRIGHT'] ?? '',
                 'bmc.enabled'      => filter_var($_ENV['BMC_ENABLED'] ?? 'false', FILTER_VALIDATE_BOOLEAN),

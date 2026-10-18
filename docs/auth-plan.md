@@ -252,10 +252,29 @@ Visibility is enforced since phase 4. Media files themselves are served without 
   admin able to log in can't lose that ability (a safety net behind the self rules). Disabling a
   user logs them out everywhere at once.
 
-### 8. Likes, comments, view counts ⬜ (planned feature)
-- Logged in: rows carry `user_id` (one like per user). Logged out: rows carry `anon_id` from the
-  anonymous cookie.
-- On login, likes made under the current anonymous id are reassigned to the account.
+### 8. Likes, comments, view counts ✅ (checkpoint 7)
+**Views** — counted from the player, checked by the server (`src/Stats/ViewCounter.php`):
+- The watch and embed pages carry a token signed with `APP_SECRET` (video id + time served). The
+  player (`assets/js/views.js`) sends one beacon per page load once the video has *actually*
+  played 30 s, or half of a shorter video (seeks and pauses excluded).
+- A report counts only if: the token is valid for that video and less than 6 h old; at least the
+  threshold has really elapsed since the page was served; the viewer may watch the video; the
+  user agent isn't a bot/tool; the viewer wasn't counted for this video within the last **hour**
+  (repeat views count after that); the IP has fewer than 30 counted views in the last hour.
+- Viewer identity: the account when logged in; otherwise an HMAC of (day, IP, user agent) — no
+  cookie, no stored IP address. Admin views count.
+- Raw events in `video_views` (to remove suspicious ones and recompute) and a cached
+  `videos.view_count`, shown as "N vues" to everyone and in the admin list.
+- `videos.duration` (migration 004) is probed when a video is added, or on first view for older
+  entries; `004-backfill-duration.php` filled in the existing ones.
+
+**Likes and comments** — only for logged-in users whose group has access to the collection (and
+admins); `video_likes` and `video_comments` were recreated for accounts (migration 004).
+- Like button next to share/embed, count visible to everyone, toggled without reloading (form
+  post without JavaScript); disabled with an explanation for others.
+- Comments under the description, visible to everyone who can watch the video, newest first;
+  plain text up to 2,000 characters; deletable by their author or an admin; 10 per 10 minutes per
+  user; the draft is kept when a comment is refused.
 
 ### 9. Tests ⬜
 - PHPUnit for the access rules (visibility × anonymous / member / non-member / admin),

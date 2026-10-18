@@ -1193,3 +1193,116 @@ main.page-admin {
     font-size: 1.6rem;
   }
 }
+
+/* ---- Watch page: views, likes, comments ---- */
+
+.view-count {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.video-actions .actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.like-form {
+  margin: 0;
+}
+
+.video-actions .actions .like-btn,
+.like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-color);
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.like-btn .material-icons {
+  font-size: 1.2rem;
+}
+
+.like-btn[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.like-btn:hover:not(.is-disabled) {
+  background: var(--hover);
+}
+
+.like-btn.is-disabled {
+  cursor: default;
+  color: var(--muted);
+}
+
+.comments h3 {
+  margin-bottom: 0.75rem;
+}
+
+.comments .comment-form textarea {
+  box-sizing: border-box;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  font: inherit;
+  resize: vertical;
+}
+
+.comments .comment-form textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.comments .comment-form .btn {
+  padding: 0.4rem 1rem;
+}
+
+.comments a {
+  color: var(--accent);
+}
+
+.comment {
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.comment-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.comment p {
+  margin: 0.35rem 0 0;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.comments form.comment-delete {
+  display: block;
+  margin: 0 0 0 auto;
+}
+
+.comment-delete button {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.2rem;
+}
+
+.comment-delete button:hover {
+  color: var(--error-text);
+}

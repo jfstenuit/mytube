@@ -14,6 +14,34 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Like button: toggled without reloading; falls back to a normal form post on error
+    const likeForm = document.querySelector('.like-form');
+    if (likeForm) {
+        likeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const button = likeForm.querySelector('.like-btn');
+            button.disabled = true;
+            try {
+                const response = await fetch(likeForm.action, {
+                    method: 'POST',
+                    body: new FormData(likeForm),
+                    headers: { 'Accept': 'application/json' },
+                    credentials: 'same-origin',
+                });
+                if (!response.ok) throw new Error(response.status);
+                const result = await response.json();
+                button.setAttribute('aria-pressed', result.liked ? 'true' : 'false');
+                button.title = result.liked ? 'Je n’aime plus' : 'J’aime';
+                button.querySelector('.material-icons').textContent = result.liked ? 'thumb_up' : 'thumb_up_off_alt';
+                button.querySelector('.like-count').textContent = result.count.toLocaleString('fr-BE');
+            } catch (err) {
+                likeForm.submit();
+            } finally {
+                button.disabled = false;
+            }
+        });
+    }
+
     const el = document.getElementById('video-player');
     const media = window.atob(el.dataset.src);
     const thumb = window.atob(el.dataset.thumb);

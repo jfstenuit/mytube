@@ -6,6 +6,8 @@ use App\Core\App;
 use App\Core\Config;
 use App\Media\MediaLibrary;
 use App\Media\VideoProbe;
+use App\Models\Engagement;
+use App\Stats\ViewCounter;
 use PDO;
 
 class VideoController
@@ -118,6 +120,15 @@ class VideoController
             }
         }
 
+        // Duration (view threshold for short videos); older entries get it on first view
+        if ($video['duration'] === null && $mode !== 'oembed') {
+            $info = VideoProbe::probe($videoPath);
+            if ($info && $info['duration'] !== null) {
+                $dbh->prepare('UPDATE videos SET duration = ? WHERE id = ?')->execute([round($info['duration'], 3), $v]);
+                $video['duration'] = $info['duration'];
+            }
+        }
+
         if (preg_match('/^(\d+)x(\d+)$/', $video['resolution'], $m)) {
             $width = (int) $m[1];
             $height = (int) $m[2];
@@ -159,9 +170,16 @@ class VideoController
             'bmc_button_text' => Config::get('bmc.button_text'),
         ];
 
+        // View counting: signed token and playback threshold for the player (watch and embed)
+        $counter = new ViewCounter($dbh, $app->throttle, Config::get('app.secret'));
+        if ($counter->enabled()) {
+            $context['view_token'] = $counter->token($v);
+            $context['view_threshold'] = ViewCounter::threshold($video['duration'] !== null ? (float) $video['duration'] : null);
+        }
 
         if ($mode === 'watch') {
             $context['collection_nav'] = $this->collectionNav((int) $video['collection_id']);
+            $context += $this->engagement($video);
             // The sidebar depends on who is logged in
             header('Vary: Cookie');
             $app->render('watch.twig', $context);
@@ -215,5 +233,25 @@ class VideoController
         $sth->execute(array_merge($params, [$collectionId]));
 
         return ['current' => $current, 'others' => $sth->fetchAll(PDO::FETCH_ASSOC)];
+    }
+
+    /** Likes and comments of the watch page, and what the viewer may do with them */
+    private function engagement(array $video): array
+    {
+        $app = $this->app;
+        $db = $app->db();
+        $user = $app->auth->user();
+        $canEngage = $user !== null && $this->access->hasCollectionAccess((int) $video['collection_id']);
+        $draft = $canEngage ? $app->session->get('comment_draft') : null;
+        return [
+            'like_count' => Engagement::likeCount($db, $video['id']),
+            'liked' => $canEngage && Engagement::hasLiked($db, $video['id'], $user->id),
+            // anonymous: invite to log in; member: may like and comment; other: not a member
+            'engage_state' => $user === null ? 'anonymous' : ($canEngage ? 'member' : 'outsider'),
+            'comments' => Engagement::comments($db, $video['id']),
+            'comment_draft' => ($draft['video'] ?? null) === $video['id'] ? $draft['text'] : '',
+            'comment_max' => Engagement::COMMENT_MAX_LENGTH,
+            'is_admin' => $user?->isAdmin() ?? false,
+        ];
     }
 }

@@ -7,6 +7,7 @@ use App\Controllers\AdminController;
 use App\Controllers\AdminGroupsController;
 use App\Controllers\AdminUsersController;
 use App\Controllers\AuthController;
+use App\Controllers\EngagementController;
 use App\Controllers\PasswordResetController;
 use App\Controllers\RegistrationController;
 use App\Controllers\VideoController;
@@ -23,6 +24,10 @@ $app = new App(__DIR__);
     ->get('watch', [VideoController::class, 'watch'])
     ->get('embed', [VideoController::class, 'embed'])
     ->get('oembed', [VideoController::class, 'oembed'])
+    ->post('view', [EngagementController::class, 'view'])
+    ->post('like', [EngagementController::class, 'like'])
+    ->post('comment', [EngagementController::class, 'comment'])
+    ->post('comment/delete', [EngagementController::class, 'deleteComment'])
     ->add(['GET', 'POST'], 'login', [AuthController::class, 'login'])
     ->post('logout', [AuthController::class, 'logout'])
     ->add(['GET', 'POST'], 'register', [RegistrationController::class, 'register'])

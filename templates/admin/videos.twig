@@ -16,6 +16,7 @@
           <th scope="col">Titre</th>
           <th scope="col" class="col-optional">Collection</th>
           <th scope="col">Visibilité</th>
+          <th scope="col" class="col-optional">Vues</th>
           <th scope="col" class="col-optional">Média</th>
           <th scope="col"><span class="visually-hidden">Actions</span></th>
         </tr>
@@ -30,6 +31,7 @@
           </td>
           <td class="col-optional">{{ video.collection_name }}</td>
           <td><span class="badge badge-{{ video.visibility }}">{{ visibility_labels[video.visibility] }}</span></td>
+          <td class="col-optional">{{ video.view_count|number_format(0, ',', ' ') }}</td>
           <td class="col-optional">
             {% if video.media %}
               <span class="muted small">{{ video.media.type|upper }} · {{ video.path }}</span>

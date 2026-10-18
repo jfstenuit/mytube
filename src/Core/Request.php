@@ -88,6 +88,12 @@ class Request
         return $origin;
     }
 
+    /** The client asked for JSON (fetch() calls from our scripts) */
+    public function wantsJson(): bool
+    {
+        return str_contains($this->server['HTTP_ACCEPT'] ?? '', 'application/json');
+    }
+
     public function userAgent(): string
     {
         return mb_substr($this->server['HTTP_USER_AGENT'] ?? '', 0, 255);

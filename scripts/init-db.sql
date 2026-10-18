@@ -60,44 +60,57 @@ CREATE TABLE `uploads` (
 
 --
 -- Table structure for table `video_comments`
---   anon_id: anonymous visitor id (cookie), user_id: logged-in user
 --
 
 DROP TABLE IF EXISTS `video_comments`;
 CREATE TABLE `video_comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `video_id` varchar(64) NOT NULL,
-  `anon_id` char(32) DEFAULT NULL,
-  `user_id` int(11) DEFAULT NULL,
+  `video_id` char(12) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `user_id` int(11) NOT NULL,
   `comment` text NOT NULL,
-  `posted_at` datetime DEFAULT current_timestamp(),
+  `posted_at` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `idx_video_comments_video` (`video_id`, `posted_at`),
   KEY `idx_video_comments_user` (`user_id`),
-  CONSTRAINT `fk_video_comments_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `chk_video_comments_owner` CHECK (`anon_id` IS NOT NULL OR `user_id` IS NOT NULL)
-);
+  CONSTRAINT `fk_video_comments_video` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_video_comments_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 --
 -- Table structure for table `video_likes`
---   anon_id: anonymous visitor id (cookie), user_id: logged-in user
 --
 
 DROP TABLE IF EXISTS `video_likes`;
 CREATE TABLE `video_likes` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `video_id` varchar(64) NOT NULL,
-  `anon_id` char(32) DEFAULT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `liked_at` datetime DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_video_likes_anon` (`video_id`, `anon_id`),
-  UNIQUE KEY `uq_video_likes_user` (`video_id`, `user_id`),
+  `video_id` char(12) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `liked_at` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`video_id`, `user_id`),
   KEY `idx_video_likes_user` (`user_id`),
-  CONSTRAINT `fk_video_likes_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `chk_video_likes_owner` CHECK (`anon_id` IS NOT NULL OR `user_id` IS NOT NULL)
-);
+  CONSTRAINT `fk_video_likes_video` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_video_likes_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Table structure for table `video_views`
+--   viewer_hash: HMAC of the user id, or of (day, IP, user agent) for anonymous viewers
+--
+
+DROP TABLE IF EXISTS `video_views`;
+CREATE TABLE `video_views` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `video_id` char(12) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `viewer_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `viewed_at` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_video_views_viewer` (`video_id`, `viewer_hash`, `viewed_at`),
+  KEY `idx_video_views_date` (`viewed_at`),
+  KEY `idx_video_views_user` (`user_id`),
+  CONSTRAINT `fk_video_views_video` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_video_views_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Table structure for table `videos`
@@ -113,6 +126,8 @@ CREATE TABLE `videos` (
   `path` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   `cdnurl` text CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
   `resolution` varchar(12) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `duration` decimal(10,3) DEFAULT NULL,
+  `view_count` int(10) unsigned NOT NULL DEFAULT 0,
   `description` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
@@ -244,4 +259,4 @@ INSERT INTO `collections` (`id`, `name`) VALUES (0, 'The default collection');
 INSERT INTO `user_groups` (`id`, `name`, `description`, `is_builtin`)
 VALUES (1, 'admin', 'Administrateurs : accès complet à toutes les collections et à l''administration', 1);
 
-INSERT INTO `schema_migrations` (`version`) VALUES ('001-auth'), ('002-tokens'), ('003-video-created-at');
+INSERT INTO `schema_migrations` (`version`) VALUES ('001-auth'), ('002-tokens'), ('003-video-created-at'), ('004-engagement');

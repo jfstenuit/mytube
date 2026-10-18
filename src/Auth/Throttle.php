@@ -21,6 +21,10 @@ class Throttle
         // Logged-in users: current password checks, email change requests (subject "user:ID")
         'password' => ['window' => 900,  'subject' => 5, 'ip' => 20, 'failures_only' => true],
         'email_change' => ['window' => 3600, 'subject' => 3, 'ip' => 10, 'failures_only' => false],
+        // Counted views: 30 per IP per hour; no per-video limit (subject = video id)
+        'view'     => ['window' => 3600, 'subject' => PHP_INT_MAX, 'ip' => 30, 'failures_only' => false],
+        // Comments: subject "user:ID"
+        'comment'  => ['window' => 600,  'subject' => 10, 'ip' => 30, 'failures_only' => false],
     ];
 
     public function __construct(private PDO $db)

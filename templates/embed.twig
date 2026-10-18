@@ -7,6 +7,8 @@
 
     {% include 'partials/videojs-includes.twig' %}
 
+    <script defer src="{{ asset('assets/js/views.js') }}"></script>
+
     <title>{{ video.title|e }}</title>
 
     <script type="text/javascript">
@@ -39,7 +41,8 @@ document.addEventListener('DOMContentLoaded', function () {
     <div class="video-container">
         <div class="video-wrapper" style="position: relative; width: 100%; padding-top: {{ (video.aspect_ratio * 100) }}%;">
             <video id="video-player" class="video-js" controls preload="auto"
-            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></video>
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+            {% if view_token is defined %}data-video-id="{{ video.id }}" data-view-token="{{ view_token }}" data-view-threshold="{{ view_threshold }}"{% endif %}></video>
         </div>
     </div>
 </body>
