@@ -16,7 +16,7 @@ DIRS=(
   "logs/"
   "processed/"
   "thumbs/"
-  "smarty/"
+  "twig/cache/"
 )
 
 echo "Setting POSIX ACLs for user: $TARGET_USER"
