@@ -251,6 +251,32 @@ main.page-narrow {
   color: var(--muted);
 }
 
+.form label.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.form label.checkbox input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--accent);
+}
+
+.flashes {
+  max-width: 960px;
+  margin: 1rem auto 0;
+  padding: 0 1rem;
+}
+
+.flashes .alert {
+  margin-bottom: 0.5rem;
+}
+
 .form .btn {
   margin-top: 1rem;
   align-self: flex-start;

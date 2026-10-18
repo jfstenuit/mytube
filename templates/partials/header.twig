@@ -23,7 +23,7 @@
         <a role="menuitem" href="account#password"><span class="material-icons" aria-hidden="true">lock</span>Changer le mot de passe</a>
         <hr>
         <form method="post" action="logout">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" role="menuitem"><span class="material-icons" aria-hidden="true">logout</span>Se déconnecter</button>
         </form>
       </div>

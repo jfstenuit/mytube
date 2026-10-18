@@ -12,4 +12,5 @@
 !/logs/.gitkeep
 /vendor/
 .env
+.claude
 RESUME.md

@@ -17,6 +17,14 @@
 
   {% include 'partials/header.twig' %}
 
+  {% if flashes %}
+  <div class="flashes">
+    {% for flash in flashes %}
+    <div class="alert alert-{{ flash.type }}" role="status">{{ flash.message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   {% block content %}{% endblock %}
 
   {% if footer_copyright %}

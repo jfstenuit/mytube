@@ -2,7 +2,8 @@
 // Create a user from the command line (e.g. the first administrator).
 //
 // Usage: php scripts/create-user.php <username> <email> [--admin] [--name="Display Name"]
-// The password is read from the terminal without echo.
+// The password is read from the terminal without echo. Accounts created here
+// are considered verified (no confirmation email).
 
 if (PHP_SAPI !== 'cli') {
     exit(1);
@@ -12,8 +13,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use App\Core\Config;
 use App\Core\Database;
-
-const ADMIN_GROUP_ID = 1;
+use App\Models\User;
 
 $args = array_slice($argv, 1);
 $isAdmin = in_array('--admin', $args, true);
@@ -73,15 +73,15 @@ $dbh = Database::get();
 try {
     $dbh->beginTransaction();
     $sth = $dbh->prepare(
-        'INSERT INTO users (username, email, display_name, password_hash, password_changed_at)
-         VALUES (?, ?, ?, ?, NOW())'
+        'INSERT INTO users (username, email, email_verified_at, display_name, password_hash, password_changed_at)
+         VALUES (?, ?, NOW(), ?, ?, NOW())'
     );
     $sth->execute([$username, $email, $displayName ?: $username, password_hash($password, PASSWORD_DEFAULT)]);
     $userId = (int) $dbh->lastInsertId();
 
     if ($isAdmin) {
         $dbh->prepare('INSERT INTO group_members (group_id, user_id) VALUES (?, ?)')
-            ->execute([ADMIN_GROUP_ID, $userId]);
+            ->execute([User::ADMIN_GROUP_ID, $userId]);
     }
     $dbh->commit();
 } catch (PDOException $e) {

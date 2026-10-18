@@ -7,11 +7,10 @@
     <section class="card">
       <h2>Connexion</h2>
 
-      {% if notice %}<div class="alert alert-info" role="status">{{ notice }}</div>{% endif %}
       {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
 
       <form method="post" action="login" class="form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="return" value="{{ return_to }}">
 
         <label for="login-identifier">Nom d'utilisateur ou adresse e-mail</label>
@@ -21,10 +20,13 @@
         <label for="login-password">Mot de passe</label>
         <input id="login-password" name="password" type="password" autocomplete="current-password" required>
 
+        <label class="checkbox">
+          <input type="checkbox" name="remember" value="1">
+          Se souvenir de moi
+        </label>
+
         <button type="submit" class="btn btn-primary">Se connecter</button>
       </form>
-
-      <p class="form-hint">Les comptes sont créés par un administrateur.</p>
     </section>
   </main>
 {% endblock %}

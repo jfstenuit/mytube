@@ -1,0 +1,13 @@
+{% extends 'base.twig' %}
+
+{% block title %}Erreur {{ status }} – MyTube{% endblock %}
+
+{% block content %}
+  <main class="page-narrow">
+    <section class="card">
+      <h2>Erreur {{ status }}</h2>
+      <p>{{ message }}</p>
+      <p><a href="./">Retour à l'accueil</a></p>
+    </section>
+  </main>
+{% endblock %}

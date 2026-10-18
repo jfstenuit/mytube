@@ -4,13 +4,10 @@
 
 {% block content %}
   <main class="page-narrow">
-    {% if notice %}<div class="alert alert-info" role="status">{{ notice }}</div>{% endif %}
-    {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
-
     <section class="card" id="profile">
       <h2>Mon profil</h2>
       <form method="post" action="account" class="form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="form" value="profile">
 
         <label for="profile-username">Nom d'utilisateur</label>
@@ -35,7 +32,7 @@
     <section class="card" id="password">
       <h2>Changer le mot de passe</h2>
       <form method="post" action="account" class="form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="form" value="password">
         {# Hidden username helps password managers associate the new password #}
         <input type="text" name="username" value="{{ current_user.username }}" autocomplete="username" hidden>

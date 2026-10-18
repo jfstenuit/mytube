@@ -60,29 +60,43 @@ CREATE TABLE `uploads` (
 
 --
 -- Table structure for table `video_comments`
+--   anon_id: anonymous visitor id (cookie), user_id: logged-in user
 --
 
 DROP TABLE IF EXISTS `video_comments`;
 CREATE TABLE `video_comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `video_id` varchar(64) NOT NULL,
-  `user_id` char(32) NOT NULL,
+  `anon_id` char(32) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
   `comment` text NOT NULL,
   `posted_at` datetime DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_video_comments_video` (`video_id`, `posted_at`),
+  KEY `idx_video_comments_user` (`user_id`),
+  CONSTRAINT `fk_video_comments_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `chk_video_comments_owner` CHECK (`anon_id` IS NOT NULL OR `user_id` IS NOT NULL)
 );
 
 
 --
 -- Table structure for table `video_likes`
+--   anon_id: anonymous visitor id (cookie), user_id: logged-in user
 --
 
 DROP TABLE IF EXISTS `video_likes`;
 CREATE TABLE `video_likes` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `video_id` varchar(64) NOT NULL,
-  `user_id` char(32) NOT NULL,
+  `anon_id` char(32) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
   `liked_at` datetime DEFAULT current_timestamp(),
-  PRIMARY KEY (`video_id`,`user_id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_video_likes_anon` (`video_id`, `anon_id`),
+  UNIQUE KEY `uq_video_likes_user` (`video_id`, `user_id`),
+  KEY `idx_video_likes_user` (`user_id`),
+  CONSTRAINT `fk_video_likes_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `chk_video_likes_owner` CHECK (`anon_id` IS NOT NULL OR `user_id` IS NOT NULL)
 );
 
 --
@@ -114,8 +128,9 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(64) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
   `email` varchar(255) NOT NULL,
+  `email_verified_at` datetime DEFAULT NULL,
   `display_name` varchar(255) NOT NULL DEFAULT '',
-  `password_hash` varchar(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `password_hash` varchar(255) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -172,19 +187,48 @@ CREATE TABLE `group_collections` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Table structure for table `login_attempts`
+-- Table structure for table `throttle_events`
+--   action: login, register, reset
 --
 
-DROP TABLE IF EXISTS `login_attempts`;
-CREATE TABLE `login_attempts` (
+DROP TABLE IF EXISTS `throttle_events`;
+CREATE TABLE `throttle_events` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `username` varchar(255) NOT NULL,
+  `action` varchar(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `subject` varchar(255) NOT NULL,
   `ip` varbinary(16) NOT NULL,
   `success` tinyint(1) NOT NULL,
-  `attempted_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
-  KEY `idx_login_attempts_username` (`username`, `attempted_at`),
-  KEY `idx_login_attempts_ip` (`ip`, `attempted_at`)
+  KEY `idx_throttle_events_subject` (`action`, `subject`, `created_at`),
+  KEY `idx_throttle_events_ip` (`action`, `ip`, `created_at`),
+  KEY `idx_throttle_events_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Table structure for table `user_tokens`
+--   remember-me cookies, email verification, password reset, email change;
+--   only a SHA-256 hash of the validator is stored
+--
+
+DROP TABLE IF EXISTS `user_tokens`;
+CREATE TABLE `user_tokens` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `type` enum('remember','verify_email','reset_password','change_email') NOT NULL,
+  `selector` char(24) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `validator_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `data` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `expires_at` datetime NOT NULL,
+  `last_used_at` datetime DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `ip` varbinary(16) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_user_tokens_selector` (`selector`),
+  KEY `idx_user_tokens_user` (`user_id`, `type`),
+  KEY `idx_user_tokens_expires` (`expires_at`),
+  CONSTRAINT `fk_user_tokens_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
@@ -198,4 +242,4 @@ INSERT INTO `collections` (`id`, `name`) VALUES (0, 'The default collection');
 INSERT INTO `user_groups` (`id`, `name`, `description`, `is_builtin`)
 VALUES (1, 'admin', 'Administrateurs : accès complet à toutes les collections et à l''administration', 1);
 
-INSERT INTO `schema_migrations` (`version`) VALUES ('001-auth');
+INSERT INTO `schema_migrations` (`version`) VALUES ('001-auth'), ('002-tokens');

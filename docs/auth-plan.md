@@ -89,7 +89,15 @@ cross-site. That is expected, and unlisted videos are the way to embed.
 - `assets/js/usermenu.js`: dropdown with keyboard support (↓/↑/Esc, closes on click outside)
 - Home page (`/`): random public video; versioned asset URLs (`asset()` Twig function)
 
-### 3. Core plumbing & authentication 🔨
+### 3. Core plumbing & authentication ✅
+Notes from implementation:
+- Sessions start lazily: anonymous visitors get no cookie until they open the login page.
+- Apache already sees real client IPs (checked from another LAN machine), so `TRUSTED_PROXIES`
+  stays empty on the dev instance.
+- `scripts/send-test-mail.php <recipient>` checks the mail setup; `scripts/create-user.php`
+  creates already-verified accounts.
+- Twig updated to 3.30 (security advisories, none affecting this app since the sandbox isn't used).
+
 - Migration `002-tokens.sql`:
   - `user_tokens`
   - `users.email_verified_at`, and `users.password_hash` made nullable
