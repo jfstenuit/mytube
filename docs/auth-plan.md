@@ -173,12 +173,16 @@ Planned as:
 - Accounts without a password (future passkeys) can set one without a "current password" field.
 - Email change requests are throttled (3 per hour per user).
 
-### 5b. Collections list ⬜
-- After login without a `return` URL, users land on the home page (random public video)
-- Logged-in users get a **list of the collections they can see**: collections granted to their
-  groups (all collections for admins), plus collections containing public videos
-- Linked from the user menu ("Mes collections") and from the home page; each collection page
-  lists the videos the user may watch (public, plus unlisted and private ones they have access to)
+### 5b. Collections list ✅ (covered by phase 4, no separate code)
+The collection switcher on the watch page (phase 4) fulfils this phase:
+- After login without a `return` URL, users land on the home page (since phase 3).
+- The sidebar's current collection plus the "Autres collections" menu list exactly the collections
+  the viewer can see (granted to their groups, all for admins, plus those with public videos);
+  anonymous visitors get it too when several collections have public videos.
+- The home page is a watch page, so the list is available there.
+- No separate collections page or "Mes collections" user-menu entry: the sidebar lists the visible
+  videos of the current collection, and the switcher is on every watch page. Both can be added
+  later if a full overview of all collections becomes useful.
 
 ### 6. Media delivery & protection ⬜
 Goals: PHP never streams media, and media may be moved to a separate server or CDN.
