@@ -152,7 +152,7 @@ CREATE TABLE `users` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `last_login_at` datetime DEFAULT NULL,
-  `password_changed_at` datetime DEFAULT NULL,
+  `password_changed_at` datetime(6) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_users_username` (`username`),
   UNIQUE KEY `uq_users_email` (`email`)
@@ -236,7 +236,7 @@ CREATE TABLE `user_tokens` (
   `selector` char(24) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `validator_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `data` varchar(255) DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `created_at` datetime(6) NOT NULL DEFAULT current_timestamp(6),
   `expires_at` datetime NOT NULL,
   `last_used_at` datetime DEFAULT NULL,
   `user_agent` varchar(255) DEFAULT NULL,
@@ -259,4 +259,4 @@ INSERT INTO `collections` (`id`, `name`) VALUES (0, 'The default collection');
 INSERT INTO `user_groups` (`id`, `name`, `description`, `is_builtin`)
 VALUES (1, 'admin', 'Administrateurs : accès complet à toutes les collections et à l''administration', 1);
 
-INSERT INTO `schema_migrations` (`version`) VALUES ('001-auth'), ('002-tokens'), ('003-video-created-at'), ('004-engagement');
+INSERT INTO `schema_migrations` (`version`) VALUES ('001-auth'), ('002-tokens'), ('003-video-created-at'), ('004-engagement'), ('005-precise-auth-times');

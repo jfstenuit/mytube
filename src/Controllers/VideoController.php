@@ -102,14 +102,6 @@ class VideoController
         $videoPath = $media['file'];
         $videoUrlPath = $media['url'];
 
-        // Videos added through the admin UI already have a thumbnail and a resolution;
-        // older entries get them on first view
-        // Check if we have a thumbnail
-        $thumbsPath = $app->rootDir . '/thumbs/' . $v . '.jpg';
-        if (!file_exists($thumbsPath)) {
-            VideoProbe::generateThumbnail($videoPath, $thumbsPath);
-        }
-
         // Check for video resolution
         if (empty($video['resolution'])) {
             $resolution = VideoProbe::resolution($videoPath);
@@ -127,6 +119,14 @@ class VideoController
                 $dbh->prepare('UPDATE videos SET duration = ? WHERE id = ?')->execute([round($info['duration'], 3), $v]);
                 $video['duration'] = $info['duration'];
             }
+        }
+
+        // Videos added through the admin UI already have a thumbnail, a resolution and a
+        // duration; older entries get them on first view
+        $thumbsPath = $app->rootDir . '/thumbs/' . $v . '.jpg';
+        if (!file_exists($thumbsPath)) {
+            $duration = $video['duration'] !== null ? (float) $video['duration'] : null;
+            VideoProbe::generateThumbnail($videoPath, $thumbsPath, VideoProbe::defaultThumbnailTime($duration));
         }
 
         if (preg_match('/^(\d+)x(\d+)$/', $video['resolution'], $m)) {

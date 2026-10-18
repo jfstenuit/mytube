@@ -23,7 +23,7 @@ class User
         private readonly ?string $passwordHash,
         public readonly bool $isActive,
         public readonly bool $isEmailVerified,
-        public readonly int $passwordChangedTs,
+        public readonly float $passwordChangedTs,
         public readonly array $groups
     ) {
     }
@@ -49,7 +49,7 @@ class User
                                   ?string $passwordHash, bool $emailVerified = false): int
     {
         $sth = $db->prepare('INSERT INTO users (username, email, email_verified_at, display_name, password_hash, password_changed_at)
-            VALUES (?, ?, IF(?, NOW(), NULL), ?, ?, NOW())');
+            VALUES (?, ?, IF(?, NOW(), NULL), ?, ?, NOW(6))');
         $sth->execute([$username, $email, (int) $emailVerified, $displayName, $passwordHash]);
         return (int) $db->lastInsertId();
     }
@@ -78,7 +78,7 @@ class User
             $row['password_hash'],
             (bool) $row['is_active'],
             (bool) $row['email_verified'],
-            (int) $row['password_changed_ts'],
+            (float) $row['password_changed_ts'],
             $sth->fetchAll(PDO::FETCH_KEY_PAIR)
         );
     }

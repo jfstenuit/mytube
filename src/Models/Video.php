@@ -31,14 +31,14 @@ class Video
     /** @return string id of the new video */
     public static function create(PDO $db, array $data): string
     {
-        $sth = $db->prepare('INSERT INTO videos (id, collection_id, visibility, title, path, resolution, description)
-            VALUES (?, ?, ?, ?, ?, ?, ?)');
+        $sth = $db->prepare('INSERT INTO videos (id, collection_id, visibility, title, path, resolution, duration, description)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
         // Retry on the (unlikely) collision of random ids
         for ($attempt = 0; ; $attempt++) {
             $id = self::generateId();
             try {
                 $sth->execute([$id, $data['collection_id'], $data['visibility'], $data['title'], $data['path'],
-                    $data['resolution'], $data['description']]);
+                    $data['resolution'], $data['duration'] ?? null, $data['description']]);
                 return $id;
             } catch (\PDOException $e) {
                 if ($e->getCode() !== '23000' || $attempt >= 3 || self::find($db, $id) === null) {

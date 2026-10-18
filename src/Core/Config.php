@@ -12,6 +12,11 @@ class Config
         if (empty(self::$settings)) {
             $dotenv = Dotenv::createImmutable($basePath);
             $dotenv->load();
+            // Test runs (tests/README.md) override some settings through .env.e2e; the
+            // file is only honoured on development instances
+            if (($_ENV['APP_ENV'] ?? 'production') === 'development' && is_file($basePath . '/.env.e2e')) {
+                Dotenv::createMutable($basePath, '.env.e2e')->load();
+            }
 
             self::$settings = [
                 'db.host'          => $_ENV['DB_HOST']          ?? 'localhost',

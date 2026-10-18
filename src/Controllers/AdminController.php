@@ -75,6 +75,7 @@ class AdminController extends AdminBaseController
             if (!$errors) {
                 $data['path'] = $path;
                 $data['resolution'] = $info ? "{$info['width']}x{$info['height']}" : '';
+                $data['duration'] = $info && $info['duration'] !== null ? round($info['duration'], 3) : null;
                 $id = Video::create($db, $data);
                 $thumbnailOk = VideoProbe::generateThumbnail($media['file'], $this->thumbnailFile($id), (float) $form['thumbnail_time']);
                 $app->session->flash('success', sprintf('La vidéo « %s » a été ajoutée.', $data['title']));

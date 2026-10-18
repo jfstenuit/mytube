@@ -75,7 +75,7 @@ try {
     $dbh->beginTransaction();
     $sth = $dbh->prepare(
         'INSERT INTO users (username, email, email_verified_at, display_name, password_hash, password_changed_at)
-         VALUES (?, ?, NOW(), ?, ?, NOW())'
+         VALUES (?, ?, NOW(), ?, ?, NOW(6))'
     );
     $sth->execute([$username, $email, $displayName ?: $username, Passwords::hash($password)]);
     $userId = (int) $dbh->lastInsertId();

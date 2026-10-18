@@ -169,7 +169,7 @@ class AccountController
             return $error;
         }
 
-        $app->db()->prepare('UPDATE users SET password_hash = ?, password_changed_at = NOW() WHERE id = ?')
+        $app->db()->prepare('UPDATE users SET password_hash = ?, password_changed_at = NOW(6) WHERE id = ?')
             ->execute([Passwords::hash($request->input('new_password')), $user->id]);
         $app->throttle->record('password', $subject, $app->clientIp, true);
         $app->auth->passwordChanged($user);

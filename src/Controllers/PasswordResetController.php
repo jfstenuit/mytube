@@ -99,7 +99,7 @@ class PasswordResetController
     {
         $app = $this->app;
         // Following the emailed link also proves ownership of the address
-        $app->db()->prepare('UPDATE users SET password_hash = ?, password_changed_at = NOW(),
+        $app->db()->prepare('UPDATE users SET password_hash = ?, password_changed_at = NOW(6),
                 email_verified_at = COALESCE(email_verified_at, NOW()) WHERE id = ?')
             ->execute([Passwords::hash($password), $user->id]);
         // Revokes this link, other reset links and every persistent login

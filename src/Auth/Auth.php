@@ -114,7 +114,7 @@ class Auth
         $this->csrf->reset();
         $this->session->set('auth.user_id', $user->id);
         // Never earlier than the last password change (clock skew between PHP and the database)
-        $this->session->set('auth.login_at', max(time(), $user->passwordChangedTs));
+        $this->session->set('auth.login_at', max(microtime(true), $user->passwordChangedTs));
         $this->session->set('auth.method', $method);
         $this->db->prepare('UPDATE users SET last_login_at = NOW() WHERE id = ?')->execute([$user->id]);
 

@@ -1,15 +1,18 @@
+{% set json = constant('JSON_UNESCAPED_SLASHES') b-or constant('JSON_UNESCAPED_UNICODE') %}
+{% autoescape false %}
 {
   "version": "1.0",
   "type": "video",
-  "provider_name": "MyTube",
-  "provider_url": "{{ urlprefix }}",
-  "title": "{{ video.title|url_encode }}",
+  "provider_name": {{ site_name|json_encode(json) }},
+  "provider_url": {{ urlprefix|json_encode(json) }},
+  "title": {{ video.title|json_encode(json) }},
   "author_name": "Jean-François Stenuit",
-  "author_url": "{{ urlprefix }}",
-  "thumbnail_url": "{{ urlprefix }}thumbs/{{ video.path|url_encode }}.jpg",
+  "author_url": {{ urlprefix|json_encode(json) }},
+  "thumbnail_url": {{ (urlprefix ~ 'thumbs/' ~ video.id ~ '.jpg')|json_encode(json) }},
   "thumbnail_width": 1920,
   "thumbnail_height": 1080,
-  "html": "<iframe src=\"{{ urlprefix }}embed?v={{ video.id|url_encode }}\" width=\"640\" height=\"360\" frameborder=\"0\" allowfullscreen></iframe>",
+  "html": {{ ('<iframe src="' ~ urlprefix ~ 'embed?v=' ~ video.id ~ '" width="640" height="360" frameborder="0" allowfullscreen></iframe>')|json_encode(json) }},
   "width": 640,
   "height": 360
 }
+{% endautoescape %}

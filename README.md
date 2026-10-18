@@ -97,6 +97,12 @@ mytube/
 6. **Enjoy**
    Visit `http://localhost/watch?id=1` to test playback.
 
+## Tests
+
+Unit, integration, end-to-end (HTTP) and browser test suites live in `tests/`; see
+[tests/README.md](tests/README.md) for what they need and how to run them
+(`vendor/bin/phpunit`, `python3 tests/browser/test_browser.py`).
+
 ## License
 
 This project is open-source and released under the **MIT License**.

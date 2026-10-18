@@ -181,23 +181,9 @@ class App
         return false;
     }
 
-    /**
-     * Validates a post-login "return" target: only absolute paths under the
-     * application base are accepted (no scheme, host, protocol-relative URL or
-     * "."/".." segments escaping the base). Anything else falls back to the home page.
-     */
+    /** Validated post-login "return" target, see ReturnPath::sanitize() */
     public function safeReturnPath(?string $target): string
     {
-        $path = $target !== null ? rawurldecode((string) parse_url($target, PHP_URL_PATH)) : '';
-        if ($target === null
-            || !str_starts_with($target, $this->basePath)
-            || str_starts_with($target, '//')
-            || preg_match('/[\\\\\x00-\x1F\x7F]/', $target)
-            || preg_match('#(^|/)\.\.?(/|$)#', $path)
-            || parse_url($target, PHP_URL_HOST) !== null
-            || parse_url($target, PHP_URL_SCHEME) !== null) {
-            return $this->basePath;
-        }
-        return $target;
+        return ReturnPath::sanitize($this->basePath, $target);
     }
 }

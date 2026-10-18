@@ -53,7 +53,7 @@ class TokenRepository
         }
         $row['validator_ok'] = hash_equals($row['validator_hash'], hash('sha256', $validator));
         $row['expired'] = (bool) $row['expired'];
-        $row['created_ts'] = (int) $row['created_ts'];
+        $row['created_ts'] = (float) $row['created_ts'];  // microseconds (migration 005)
         return $row;
     }
 

@@ -276,6 +276,16 @@ admins); `video_likes` and `video_comments` were recreated for accounts (migrati
   plain text up to 2,000 characters; deletable by their author or an admin; 10 per 10 minutes per
   user; the draft is kept when a comment is refused.
 
-### 9. Tests ⬜
-- PHPUnit for the access rules (visibility × anonymous / member / non-member / admin),
-  `return` URL validation, tokens (expiry, rotation, theft detection) and throttling
+### 9. Tests ✅ (checkpoint 8)
+`tests/` holds four suites, documented in [tests/README.md](../tests/README.md): PHPUnit `unit`
+(no database), `integration` (development database), `e2e` (HTTP against the development site,
+mail captured by a local SMTP sink, reCAPTCHA disabled through `.env.e2e`), and browser tests in
+Python through the Chrome DevTools endpoint at `http://127.0.0.1:9222`.
+
+Bugs found while writing them, and fixed:
+- oEmbed JSON title was URL-encoded; oEmbed thumbnail URLs used the media path instead of the
+  video id (both formats).
+- Videos added through the admin page didn't store their duration.
+- A session opened during the same second as a password reset survived it: password change and
+  token times now have microsecond precision (migration 005).
+- Thumbnails generated on first view used a fixed 2 min 20 s position (failed for short videos).
