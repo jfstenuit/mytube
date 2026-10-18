@@ -1,0 +1,65 @@
+{% extends 'admin/layout.twig' %}
+
+{% block title %}Ajouter une vidéo – Administration – MyTube{% endblock %}
+
+{% block admin_content %}
+  <h2>Ajouter une vidéo</h2>
+  <p class="muted">
+    Fichiers <code>NOM.mp4</code> et répertoires HLS (<code>master.m3u8</code>) présents dans
+    <code>media/</code> mais pas encore enregistrés.
+  </p>
+
+  {% if entries %}
+  <div class="table-wrap">
+    <table class="admin-table stackable">
+      <thead>
+        <tr>
+          <th scope="col">Nom</th>
+          <th scope="col">Type</th>
+          <th scope="col" class="col-optional">Taille</th>
+          <th scope="col" class="col-optional">Modifié le</th>
+          <th scope="col">État</th>
+          <th scope="col"><span class="visually-hidden">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for entry in entries %}
+        <tr>
+          <td><code>{{ entry.name }}</code></td>
+          <td>{{ entry.type|upper }}</td>
+          <td class="nowrap col-optional">{{ entry.size|filesize }}</td>
+          <td class="nowrap col-optional">{{ entry.mtime|date('d/m/Y H:i') }}</td>
+          <td>
+            {% if entry.problem == 'unreadable' %}
+              <span class="badge badge-problem">Illisible</span>
+              <div class="small muted">Le serveur web (www-data) ne peut pas lire ces fichiers.
+                Par exemple : <code>chmod -R a+rX media/{{ entry.name }}</code></div>
+            {% elseif entry.problem == 'incomplete' %}
+              <span class="badge badge-warning">Incomplet</span>
+              <div class="small muted">Une liste de lecture n'est pas terminée : encodage en cours ?</div>
+            {% elseif entry.problem == 'unsupported' %}
+              <span class="badge badge-warning">Format non pris en charge</span>
+              <div class="small muted">À encoder d'abord (déposer dans <code>incoming/</code>).</div>
+            {% elseif entry.problem == 'extension_case' %}
+              <span class="badge badge-warning">Extension</span>
+              <div class="small muted">Renommer en <code>{{ entry.name|slice(0, -4) }}.mp4</code> (minuscules).</div>
+            {% else %}
+              <span class="badge badge-ok">Prêt</span>
+            {% endif %}
+          </td>
+          <td class="actions">
+            {% if not entry.problem %}
+            <a class="btn btn-primary btn-small" href="admin/videos/new?path={{ entry.path|url_encode }}">
+              <span class="material-icons" aria-hidden="true">add</span>Ajouter
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p>Tous les médias présents dans <code>media/</code> sont déjà enregistrés.</p>
+  {% endif %}
+{% endblock %}

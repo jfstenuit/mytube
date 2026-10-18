@@ -2,6 +2,7 @@
 require __DIR__ . '/vendor/autoload.php';
 
 use App\Controllers\AccountController;
+use App\Controllers\AdminController;
 use App\Controllers\AuthController;
 use App\Controllers\PasswordResetController;
 use App\Controllers\RegistrationController;
@@ -27,4 +28,10 @@ $app = new App(__DIR__);
     ->add(['GET', 'POST'], 'forgot-password', [PasswordResetController::class, 'forgot'])
     ->add(['GET', 'POST'], 'reset-password', [PasswordResetController::class, 'reset'])
     ->add(['GET', 'POST'], 'account', [AccountController::class, 'account'])
+    ->get('admin', [AdminController::class, 'index'])
+    ->get('admin/videos', [AdminController::class, 'videos'])
+    ->get('admin/media', [AdminController::class, 'media'])
+    ->add(['GET', 'POST'], 'admin/videos/new', [AdminController::class, 'create'])
+    ->add(['GET', 'POST'], 'admin/videos/edit', [AdminController::class, 'edit'])
+    ->post('admin/videos/delete', [AdminController::class, 'delete'])
     ->dispatch($app);

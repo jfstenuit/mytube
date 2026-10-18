@@ -185,7 +185,24 @@ Goals: PHP never streams media, and media may be moved to a separate server or C
   resolution in the database.
 - Thumbnails of private videos are signed the same way.
 
-### 7. Administration UI ⬜ (part of the planned Admin UI)
+### 7. Administration UI 🔨 (done before 4–6, at checkpoint 3)
+Done: **video catalogue** (`/admin`, `admin` group only; others get a 404):
+- **Vidéos**: list with collection, visibility and media status; edit title, description,
+  collection (or a new one), visibility; regenerate the thumbnail at a chosen time; remove from the
+  catalogue (media files are kept and reappear in the scan).
+- **Ajouter une vidéo**: scans `media/` for `NAME.mp4` files and HLS directories (`master.m3u8` or
+  `manifest/video.m3u8`) not registered yet. Flags entries the web server can't read, HLS playlists
+  without `#EXT-X-ENDLIST` (encoding in progress), unsupported formats and `.MP4` in upper case.
+  Registering probes resolution and duration (ffprobe), generates the thumbnail (default: 10 % into
+  the video, at most 2 min 20 s), and defaults to **private**. This is the ingestion step of phase 6;
+  the watch page only generates missing thumbnails/resolutions for older entries.
+- `<base href>` in the layouts, so relative URLs work under `admin/…`; `APP_TIMEZONE` for displayed dates.
+
+**Until phase 4 is done, visibility is stored but not enforced**: private and unlisted videos can
+still be watched by anyone with the link, and appear in "Dans la même collection". Only the home
+page already restricts itself to public videos.
+
+Still to do:
 - Users: create, edit, deactivate, resend verification, trigger a password reset, group membership
 - Groups: create, rename, delete (not `admin`), collection grants
 - Collections: create and rename; per-video visibility and collection

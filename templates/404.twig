@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
+  {% if base_path is defined %}<base href="{{ base_path }}">{% endif %}
   <title>404 - Vidéo introuvable</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>

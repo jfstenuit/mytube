@@ -3,6 +3,7 @@ namespace App\Controllers;
 
 use App\Core\App;
 use App\Core\Config;
+use App\Media\MediaLibrary;
 use App\Media\VideoProbe;
 use PDO;
 
@@ -63,32 +64,17 @@ class VideoController
         }
 
         // we have a path from the DB - now check if it's a mp4 file, a m3u8 or if it's missing
-        $mediaRoot = realpath($app->rootDir . '/media');
-        $mediaUrl = 'media/';
-        $videoId = $video['path'];
-        $candidates = [
-            "$videoId.mp4",
-            "$videoId/manifest/video.m3u8",
-            "$videoId/master.m3u8",
-        ];
-
-        $videoPath = null;
-        $videoUrlPath = null;
-        foreach ($candidates as $relPath) {
-            $resolved = realpath($mediaRoot . '/' . $relPath);
-            if ($resolved && str_starts_with($resolved, $mediaRoot . '/')) {
-                $videoPath = $resolved;
-                $videoUrlPath = $mediaUrl . $relPath;
-                break;
-            }
-        }
-
-        if (!$videoPath) {
+        $media = (new MediaLibrary($app->rootDir . '/media'))->locate($video['path']);
+        if ($media === null) {
             error_log("Invalid video path for ID: " . htmlspecialchars($v));
             $app->notFound();
             return;
         }
+        $videoPath = $media['file'];
+        $videoUrlPath = $media['url'];
 
+        // Videos added through the admin UI already have a thumbnail and a resolution;
+        // older entries get them on first view
         // Check if we have a thumbnail
         $thumbsPath = $app->rootDir . '/thumbs/' . $v . '.jpg';
         if (!file_exists($thumbsPath)) {

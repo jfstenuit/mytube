@@ -1,0 +1,53 @@
+{% extends 'admin/layout.twig' %}
+
+{% block title %}Vidéos – Administration – MyTube{% endblock %}
+
+{% set visibility_labels = {public: 'Publique', unlisted: 'Non répertoriée', private: 'Privée'} %}
+
+{% block admin_content %}
+  <h2>Vidéos <span class="muted">({{ videos|length }})</span></h2>
+
+  {% if videos %}
+  <div class="table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th scope="col"><span class="visually-hidden">Vignette</span></th>
+          <th scope="col">Titre</th>
+          <th scope="col" class="col-optional">Collection</th>
+          <th scope="col">Visibilité</th>
+          <th scope="col" class="col-optional">Média</th>
+          <th scope="col"><span class="visually-hidden">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for video in videos %}
+        <tr>
+          <td><img class="thumb" src="{{ asset('thumbs/' ~ video.id ~ '.jpg') }}" alt="" loading="lazy"></td>
+          <td>
+            <a href="watch?v={{ video.id|url_encode }}">{{ video.title }}</a>
+            <div class="muted small">{{ video.id }}{% if video.resolution %} · {{ video.resolution }}{% endif %}</div>
+          </td>
+          <td class="col-optional">{{ video.collection_name }}</td>
+          <td><span class="badge badge-{{ video.visibility }}">{{ visibility_labels[video.visibility] }}</span></td>
+          <td class="col-optional">
+            {% if video.media %}
+              <span class="muted small">{{ video.media.type|upper }} · {{ video.path }}</span>
+            {% else %}
+              <span class="badge badge-problem" title="media/{{ video.path }}">Introuvable</span>
+            {% endif %}
+          </td>
+          <td class="actions">
+            <a class="btn btn-small" href="admin/videos/edit?id={{ video.id|url_encode }}">
+              <span class="material-icons" aria-hidden="true">edit</span>Modifier
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p>Aucune vidéo pour l'instant. <a href="admin/media">Ajouter une vidéo</a></p>
+  {% endif %}
+{% endblock %}

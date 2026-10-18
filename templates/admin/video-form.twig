@@ -1,0 +1,100 @@
+{% extends 'admin/layout.twig' %}
+
+{% block title %}{{ mode == 'create' ? 'Ajouter une vidéo' : 'Modifier « ' ~ video.title ~ ' »' }} – Administration – MyTube{% endblock %}
+
+{% block admin_content %}
+  <h2>{{ mode == 'create' ? 'Ajouter une vidéo' : 'Modifier la vidéo' }}</h2>
+
+  {% if errors %}
+  <div class="alert alert-error" role="alert">
+    {% if errors|length == 1 %}{{ errors|first }}{% else %}
+    <ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="admin-columns">
+    <form method="post" action="{{ mode == 'create' ? 'admin/videos/new' : 'admin/videos/edit' }}" class="form card">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% if mode == 'create' %}
+      <input type="hidden" name="path" value="{{ entry.path }}">
+      {% else %}
+      <input type="hidden" name="id" value="{{ video.id }}">
+      {% endif %}
+
+      <label for="video-title">Titre</label>
+      <input id="video-title" name="title" type="text" value="{{ form.title }}" maxlength="255" required autofocus>
+
+      <label for="video-description">Description</label>
+      <textarea id="video-description" name="description" rows="5">{{ form.description }}</textarea>
+
+      <label for="video-collection">Collection</label>
+      <select id="video-collection" name="collection_id">
+        {% for collection in collections %}
+        <option value="{{ collection.id }}" {% if form.collection_id == collection.id ~ '' %}selected{% endif %}>
+          {{ collection.name }} ({{ collection.video_count }})
+        </option>
+        {% endfor %}
+      </select>
+      <label for="video-new-collection" class="sub-label">… ou nouvelle collection</label>
+      <input id="video-new-collection" name="new_collection" type="text" value="{{ form.new_collection }}" maxlength="255"
+             placeholder="Nom de la nouvelle collection">
+
+      <fieldset class="radio-group">
+        <legend>Visibilité</legend>
+        <label class="checkbox"><input type="radio" name="visibility" value="public" {% if form.visibility == 'public' %}checked{% endif %}>
+          <span><strong>Publique</strong> — visible par tous, peut apparaître sur l'accueil</span></label>
+        <label class="checkbox"><input type="radio" name="visibility" value="unlisted" {% if form.visibility == 'unlisted' %}checked{% endif %}>
+          <span><strong>Non répertoriée</strong> — accessible à qui connaît le lien</span></label>
+        <label class="checkbox"><input type="radio" name="visibility" value="private" {% if form.visibility == 'private' %}checked{% endif %}>
+          <span><strong>Privée</strong> — réservée aux groupes ayant accès à la collection</span></label>
+      </fieldset>
+
+      <label for="video-thumbnail-time">{{ mode == 'create' ? 'Vignette à' : 'Régénérer la vignette à' }} (secondes)</label>
+      <input id="video-thumbnail-time" name="thumbnail_time" type="number" min="0" step="0.1"
+             {% if info and info.duration %}max="{{ info.duration|round(1, 'floor') }}"{% endif %}
+             value="{{ form.thumbnail_time }}" {% if mode == 'edit' %}placeholder="Laisser vide pour conserver la vignette actuelle"{% endif %}>
+
+      <button type="submit" class="btn btn-primary">{{ mode == 'create' ? 'Ajouter la vidéo' : 'Enregistrer' }}</button>
+    </form>
+
+    <aside class="card media-info">
+      {% if mode == 'edit' %}
+        {% if has_thumbnail %}
+        <img class="preview" src="{{ asset('thumbs/' ~ video.id ~ '.jpg') }}" alt="Vignette actuelle">
+        {% endif %}
+        <p><a href="watch?v={{ video.id|url_encode }}">
+          <span class="material-icons" aria-hidden="true">play_circle</span>Voir la vidéo</a></p>
+      {% endif %}
+      <dl>
+        <dt>Média</dt>
+        <dd><code>{{ mode == 'create' ? 'media/' ~ entry.name : 'media/' ~ (media ? media.relative : video.path) }}</code></dd>
+        {% if mode == 'create' %}
+        <dt>Type</dt><dd>{{ entry.type|upper }} · {{ entry.size|filesize }}</dd>
+        {% elseif not media %}
+        <dt>État</dt><dd><span class="badge badge-problem">Fichiers introuvables</span></dd>
+        {% endif %}
+        {% if info %}
+        <dt>Résolution</dt><dd>{{ info.width }} × {{ info.height }}</dd>
+        {% if info.duration %}
+        <dt>Durée</dt><dd>{{ (info.duration // 3600) > 0 ? (info.duration // 3600) ~ ' h ' : '' }}{{ ((info.duration % 3600) // 60) }} min {{ '%02d'|format(info.duration % 60) }} s</dd>
+        {% endif %}
+        {% endif %}
+        {% if mode == 'edit' %}
+        <dt>Identifiant</dt><dd><code>{{ video.id }}</code></dd>
+        {% endif %}
+      </dl>
+
+      {% if mode == 'edit' %}
+      <form method="post" action="admin/videos/delete" class="danger-zone"
+            onsubmit="return confirm('Supprimer « {{ video.title|e('js') }} » du catalogue ? Les fichiers média ne sont pas effacés.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="id" value="{{ video.id }}">
+        <button type="submit" class="btn btn-danger btn-small">
+          <span class="material-icons" aria-hidden="true">delete</span>Supprimer du catalogue
+        </button>
+      </form>
+      {% endif %}
+    </aside>
+  </div>
+{% endblock %}

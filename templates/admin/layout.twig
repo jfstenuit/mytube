@@ -1,0 +1,17 @@
+{% extends 'base.twig' %}
+
+{% block content %}
+  <main class="page-admin">
+    <nav class="admin-tabs" aria-label="Administration">
+      <a href="admin/videos" {% if tab == 'videos' %}aria-current="page"{% endif %}>
+        <span class="material-icons" aria-hidden="true">video_library</span>Vidéos
+      </a>
+      <a href="admin/media" {% if tab == 'media' %}aria-current="page"{% endif %}>
+        <span class="material-icons" aria-hidden="true">add_circle</span>Ajouter une vidéo
+        {% if unregistered_count %}<span class="count">{{ unregistered_count }}</span>{% endif %}
+      </a>
+    </nav>
+
+    {% block admin_content %}{% endblock %}
+  </main>
+{% endblock %}

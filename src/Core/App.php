@@ -56,6 +56,8 @@ class App
 
         $this->twig = self::createTwig($rootDir);
         $this->twig->addFunction(new TwigFunction('csrf_token', fn () => $this->csrf->token()));
+        // <base href> in the layouts: relative URLs resolve from the application root at any depth
+        $this->twig->addGlobal('base_path', $this->basePath);
         $this->twig->addGlobal('recaptcha_site_key', $this->recaptcha->siteKey());
         $this->twig->addGlobal('recaptcha_enterprise', $this->recaptcha->usesEnterpriseScript());
     }
@@ -74,6 +76,15 @@ class App
         $twig->addFunction(new TwigFunction('asset', function (string $path) use ($rootDir): string {
             $mtime = @filemtime($rootDir . '/' . $path);
             return $mtime ? $path . '?v=' . $mtime : $path;
+        }));
+        // 110911560|filesize -> "105,8 Mo"
+        $twig->addFilter(new \Twig\TwigFilter('filesize', function (?int $bytes): string {
+            if ($bytes === null) {
+                return '—';
+            }
+            $units = ['o', 'Ko', 'Mo', 'Go', 'To'];
+            $i = $bytes > 0 ? min((int) floor(log($bytes, 1024)), count($units) - 1) : 0;
+            return number_format($bytes / 1024 ** $i, $i ? 1 : 0, ',', ' ') . ' ' . $units[$i];
         }));
         $twig->addGlobal('footer_copyright', Config::get('footer.copyright'));
         $twig->addGlobal('site_name', Config::get('site.name'));
