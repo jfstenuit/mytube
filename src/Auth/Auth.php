@@ -122,6 +122,27 @@ class Auth
         $this->resolved = true;
     }
 
+    /**
+     * After a password change by the user: every persistent login is revoked and other
+     * sessions become invalid (password_changed_at); the current session continues, and
+     * keeps its "remember me" if it had a valid one.
+     */
+    public function passwordChanged(User $user): void
+    {
+        $cookie = $this->request->cookie(self::REMEMBER_COOKIE);
+        $row = $cookie !== null ? $this->tokens->lookup('remember', $cookie) : null;
+        $keepRemember = $row && $row['validator_ok'] && !$row['expired'] && (int) $row['user_id'] === $user->id;
+
+        $this->tokens->deleteForUser($user->id, 'remember');
+        $this->login(User::find($this->db, $user->id), 'password');
+        if ($keepRemember) {
+            $this->setRememberCookie($this->tokens->create($user->id, 'remember', self::REMEMBER_TTL, null,
+                $this->request->userAgent(), $this->clientIp));
+        } elseif ($cookie !== null) {
+            $this->clearRememberCookie();
+        }
+    }
+
     public function logout(): void
     {
         $cookie = $this->request->cookie(self::REMEMBER_COOKIE);

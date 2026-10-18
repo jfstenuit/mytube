@@ -75,7 +75,7 @@ class PasswordResetController
         $user = ($row && $row['validator_ok'] && !$row['expired']) ? User::find($app->db(), $row['user_id']) : null;
         if ($user === null || !$user->isActive) {
             $app->session->remove(self::SESSION_KEY);
-            $app->render('link-invalid.twig', ['resend' => false], 400);
+            $app->render('link-invalid.twig', ['kind' => 'reset'], 400);
             return;
         }
 

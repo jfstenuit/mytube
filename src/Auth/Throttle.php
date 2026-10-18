@@ -18,6 +18,9 @@ class Throttle
         'register' => ['window' => 3600, 'subject' => 3, 'ip' => 10, 'failures_only' => false],
         'reset'    => ['window' => 3600, 'subject' => 3, 'ip' => 10, 'failures_only' => false],
         'resend'   => ['window' => 3600, 'subject' => 3, 'ip' => 10, 'failures_only' => false],
+        // Logged-in users: current password checks, email change requests (subject "user:ID")
+        'password' => ['window' => 900,  'subject' => 5, 'ip' => 20, 'failures_only' => true],
+        'email_change' => ['window' => 3600, 'subject' => 3, 'ip' => 10, 'failures_only' => false],
     ];
 
     public function __construct(private PDO $db)

@@ -79,7 +79,7 @@ class RegistrationController
         header('Referrer-Policy: no-referrer');
         $row = $app->tokens->lookup('verify_email', $app->request->query('token', ''));
         if (!$row || !$row['validator_ok'] || $row['expired']) {
-            $app->render('link-invalid.twig', ['resend' => true], 400);
+            $app->render('link-invalid.twig', ['kind' => 'verify'], 400);
             return;
         }
 

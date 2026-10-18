@@ -1,0 +1,15 @@
+{% block subject %}{{ site_name }} : confirmez votre nouvelle adresse e-mail{% endblock %}
+
+{% block text %}
+Bonjour {{ name }},
+
+Vous avez demandé à utiliser cette adresse pour votre compte « {{ username }} »
+sur {{ site_name }}. Pour confirmer ce changement, ouvrez ce lien :
+
+{{ confirm_url }}
+
+Ce lien est valable {{ hours }} heures. Tant qu'il n'est pas ouvert, votre
+ancienne adresse reste en vigueur.
+
+Si vous n'êtes pas à l'origine de cette demande, ignorez simplement ce message.
+{% endblock %}

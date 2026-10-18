@@ -28,6 +28,7 @@ $app = new App(__DIR__);
     ->add(['GET', 'POST'], 'forgot-password', [PasswordResetController::class, 'forgot'])
     ->add(['GET', 'POST'], 'reset-password', [PasswordResetController::class, 'reset'])
     ->add(['GET', 'POST'], 'account', [AccountController::class, 'account'])
+    ->get('confirm-email', [AccountController::class, 'confirmEmail'])
     ->get('admin', [AdminController::class, 'index'])
     ->get('admin/videos', [AdminController::class, 'videos'])
     ->get('admin/media', [AdminController::class, 'media'])

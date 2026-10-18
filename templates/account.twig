@@ -6,6 +6,15 @@
   <main class="page-narrow">
     <section class="card" id="profile">
       <h2>Mon profil</h2>
+
+      {% if profile_errors %}
+      <div class="alert alert-error" role="alert">
+        {% if profile_errors|length == 1 %}{{ profile_errors|first }}{% else %}
+        <ul>{% for error in profile_errors %}<li>{{ error }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+      {% endif %}
+
       <form method="post" action="account" class="form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="form" value="profile">
@@ -14,12 +23,18 @@
         <input id="profile-username" type="text" value="{{ current_user.username }}" readonly>
 
         <label for="profile-display-name">Nom affiché</label>
-        <input id="profile-display-name" name="display_name" type="text" value="{{ current_user.display_name }}"
+        <input id="profile-display-name" name="display_name" type="text" value="{{ form.display_name }}"
                maxlength="255" autocomplete="name" required>
 
         <label for="profile-email">Adresse e-mail</label>
-        <input id="profile-email" name="email" type="email" value="{{ current_user.email }}"
+        <input id="profile-email" name="email" type="email" value="{{ form.email }}"
                maxlength="255" autocomplete="email" required>
+        {% if pending_email %}
+        <p class="form-hint">Changement en attente vers <strong>{{ pending_email }}</strong> :
+          ouvrez le lien envoyé à cette adresse pour le confirmer.</p>
+        {% else %}
+        <p class="form-hint">Une nouvelle adresse doit être confirmée par un lien envoyé à celle-ci.</p>
+        {% endif %}
 
         {% if current_user.groups %}
         <p class="form-hint">Groupes : {{ current_user.groups|join(', ') }}</p>
@@ -30,15 +45,20 @@
     </section>
 
     <section class="card" id="password">
-      <h2>Changer le mot de passe</h2>
-      <form method="post" action="account" class="form">
+      <h2>{{ has_password ? 'Changer le mot de passe' : 'Définir un mot de passe' }}</h2>
+
+      {% if password_error %}<div class="alert alert-error" role="alert">{{ password_error }}</div>{% endif %}
+
+      <form method="post" action="account#password" class="form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="form" value="password">
         {# Hidden username helps password managers associate the new password #}
         <input type="text" name="username" value="{{ current_user.username }}" autocomplete="username" hidden>
 
+        {% if has_password %}
         <label for="password-current">Mot de passe actuel</label>
         <input id="password-current" name="current_password" type="password" autocomplete="current-password" required>
+        {% endif %}
 
         <label for="password-new">Nouveau mot de passe</label>
         <input id="password-new" name="new_password" type="password" autocomplete="new-password" minlength="10" required>
@@ -48,7 +68,7 @@
 
         <p class="form-hint">Au moins 10 caractères. Vos autres sessions seront déconnectées.</p>
 
-        <button type="submit" class="btn btn-primary">Changer le mot de passe</button>
+        <button type="submit" class="btn btn-primary">{{ has_password ? 'Changer le mot de passe' : 'Définir le mot de passe' }}</button>
       </form>
     </section>
   </main>

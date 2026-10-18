@@ -162,12 +162,16 @@ Planned as:
 - `add-video.sh` is superseded by the admin UI ("Ajouter une vidéo"). It no longer works as is
   (`resolution` has no default), so it can be removed.
 
-### 5. Account pages ⬜
-- Profile: update the display name. Changing the email sends a `change_email` confirmation to the
-  new address; the change only takes effect once confirmed.
-- Password: verify the current one; the new one must be ≥ 10 characters and match the confirmation;
-  `password_changed_at = NOW()`; remember tokens revoked; other sessions logged out
-- Flash messages (success/error) via the session
+### 5. Account pages ✅
+- Profile: display name (shown at once in the header). Changing the email sends a `change_email`
+  link (24 h) to the new address and a notice to the current one; the change applies only once
+  the link is opened (`confirm-email`), and the account page shows the pending address meanwhile.
+  If the new address belongs to another account, nothing is sent, with the same message.
+- Password: the current one is checked (throttled: 5 failures per 15 min), the new one validated
+  as at registration. All remember-me tokens are revoked and other sessions logged out; the current
+  session continues (keeping its remember-me cookie if it had one), and a notice is mailed.
+- Accounts without a password (future passkeys) can set one without a "current password" field.
+- Email change requests are throttled (3 per hour per user).
 
 ### 5b. Collections list ⬜
 - After login without a `return` URL, users land on the home page (random public video)

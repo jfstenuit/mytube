@@ -1,0 +1,19 @@
+{% block subject %}{{ site_name }} : demande de changement d'adresse e-mail{% endblock %}
+
+{% block text %}
+Bonjour {{ name }},
+
+Une demande a été faite pour remplacer l'adresse e-mail de votre compte
+« {{ username }} » sur {{ site_name }} par :
+
+    {{ new_email }}
+
+Le changement ne prendra effet que si le lien envoyé à cette nouvelle adresse
+est ouvert.
+
+Si vous n'êtes pas à l'origine de cette demande, quelqu'un utilise peut-être
+votre compte : changez immédiatement votre mot de passe (toutes les sessions
+seront déconnectées) :
+
+{{ forgot_url }}
+{% endblock %}
